@@ -67,7 +67,9 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | Backend PostgreSQL + auth persistente | endpoints API en memoria | Adaptadores `infrastructure/repositories/postgres/` (mismo contrato), migraciones, `DATABASE_URL` requerida en prod; migrar sesiones en memoria a BD |
 | Integración frontend ↔ API | endpoints API | Sustituir repositorios estáticos (`post-repository.static.ts`, `auth-gateway.static.ts`) por consumo de la API + doble envío CSRF (obtener cookie vía GET antes de mutar) |
 | Requisito operativo reverse proxy | despliegue | Proxy debe sobrescribir `X-Forwarded-For` para que la clave de rate limit por IP sea no forjable (`rate-limit.ts`) |
-| Prueba ofensiva (`red-team`) | auth+endpoints | Pentesting: lock-out por auto-democión de admin, carrera de username (TOCTOU in-memory), fuerza bruta (429) |
+| Prueba ofensiva (`red-team`) | auth+endpoints | Pentesting: lock-out por auto-democión de admin, carrera de username (TOCTOU in-memory), fuerza bruta (429). Card Trello #26 |
+| Spec de diseño `docs/design/wireframes_admin.md` | — | **Desvío de pipeline**: `/admin` se implementó (2026-10-08) sin la especificación previa; la card de diseño (#13) sigue en Pendiente. Redactar la spec o formalizar el desvío |
+| Persistencia + integración frontend ↔ API | esquema DB (#11) | Card paraguas #27: adaptadores postgres, migrar sesiones a BD, sustituir repos estáticos por API, reverse proxy `X-Forwarded-For` |
 
 ## Estado de tests
 
@@ -80,6 +82,8 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | Monorepo Total (47 archivos de test) | 454/454 pasan | 100% PASS |
 
 ## Registro de cambios (últimos)
+
+- **2026-10-09 — Sincronización del tablero Kanban con la documentación (`product-manager`)**: revisión cruzada de Trello (MCP) contra `progress.md`. Se movieron tarjetas para reflejar el estado real: #12 (Diseño perf) y #16 (Implementar perf), #6 (Fase Frontend) → **Terminado**; #7 (Auth), #9 (Feed), #3 (Entorno) → **En revisión**; #14 (Implementar admin) → **En revisión**. Se crearon las tarjetas faltantes: **#28** API backend (Hono + Better Auth + endpoints, Terminado), **#29** CRUD fase estática (Terminado), **#25** Pantalla de bienvenida (Terminado), **#26** Pentesting red-team (Pendiente), **#27** Backend PostgreSQL + integración frontend↔API (Pendiente). Se documentó el **desvío** de que `/admin` se implementó sin `wireframes_admin.md` (card #13 sigue en Pendiente). Se añadió el label `bloqueada` a `docs/trello/board.json`. Todas las tarjetas movidas llevan un comentario con el motivo de la sincronización.
 
 - **2026-10-08 — Implementación del perfil `/profile/[username]`**: se implementó TDD (298/298 tests PASS) para los formularios de edición de perfil (`ProfileForm`), actualización de contraseña (`PasswordForm`), carga de avatar (`AvatarUploader`, `Avatar`) y la vista orquestadora del perfil (`UserProfileView`). Se configuraron acciones de servidor y validaciones correspondientes usando esquemas Zod en `@redfacyt/shared`. El diseño de los componentes se ajustó a los wireframes especificados, permitiendo edición inline, copiado rápido de nombre de usuario y reemplazo del componente `<Button>` temporal por clases puras `buttonStyles` como exige el diseño.
 
