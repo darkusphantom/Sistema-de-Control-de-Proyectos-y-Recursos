@@ -197,7 +197,7 @@ Cada requisito indica su prioridad (P0/P1/P2), cuándo aplica (**scaffold** ahor
 ### R14 — Autorización con rol fresco por petición (P0 · esta entrega · joya P0-acceso)
 
 - El middleware `requireSession` resuelve la identidad por cookie (JWT) y **re-lee el rol del usuario del store en cada petición** (O(1) en memoria). La autorización **nunca confía en el claim `role` del JWT**: el claim es solo identidad, el rol es dato fresco.
-- Consecuencia: el cambio de rol por admin (incluida la **democión**) es efectivo de inmediato; sin esto, un JWT stateless mantendría un rol stale hasta la expiración.
+- Consecuencia: el cambio de rol por admin (incluidas las transiciones entre `estudiante`/`profesor`; el rol `admin` es inmutable, R16) es efectivo de inmediato; sin esto, un JWT stateless mantendría un rol stale hasta la expiración.
 - **Cómo se comprobará**:
   - Test: admin cambia el rol de X a `estudiante`; la sesión vigente de X (JWT con claim `role` viejo) pierde acceso a `/admin/*` de inmediato.
   - Test de robustez: token firmado con claim `role: "admin"` pero store con `estudiante` → `403` en `/admin/*` (prueba que el claim no autoriza).
@@ -219,13 +219,13 @@ Cada requisito indica su prioridad (P0/P1/P2), cuándo aplica (**scaffold** ahor
 ### R16 — Admin: enforcement server-side por rol (P0 · esta entrega · joya P0-acceso)
 
 - `/admin/*` exige rol `admin` verificado **en servidor por petición** (R14): `requireSession` + `requireRole("admin")`. Nunca del cliente.
-- `PATCH /admin/users/:id/role`: solo admin; el rol no es aceptable desde ningún otro endpoint. `404` si el id no existe.
-- `PATCH /admin/posts/:id/visibility`: solo admin; acepta `"publicado"`/`"oculto"` (única vía para fijar `oculto`).
-- Riesgo asumido (MVP): un admin puede cambiarse su propio rol (lock-out); el `red-team` lo probará y se documenta.
+- `PATCH /admin/users/:id/role`: solo admin; el rol no es aceptable desde ningún otro endpoint. `404` si el id no existe. **El rol `admin` es inmutable**: rechaza (`409`/`422`) toda transición que salga de `admin` — la propia (`admin → *`) y la de otro admin. Es una regla de autorización, no un conteo: al no admitirse ninguna democión de admin, no hay que consultar cuántos admins quedan ni hay carrera por el "último admin". Provisto por un control de producto (decisión 2026-10-09, `wireframes_admin.md` §1.4 D2); el alta/baja de administradores es operativa (seed/ambiente), no por API de usuario.
+- `PATCH /admin/posts/:id/visibility`: solo admin; acepta `"publicado"`/`"oculto"` (única vía para fijar `oculto`). **Rechaza** (`409`/`422`) moderar una publicación en estado `borrador`: el endpoint no puede ser una vía para publicar material privado ajeno (R15; F-03 del review de `/admin`).
 - **Cómo se comprobará**:
   - Test: `estudiante`/`profesor` llaman a cualquier `/admin/*` → `403`.
-  - Test: admin cambia rol → `204` y el rol efectivo cambia en el store (inmediatez verificada por R14).
-  - Test: admin oculta/restaura un post → `200` y el feed refleja el cambio; no-admin → `403`; id inexistente → `404`.
+  - Test: admin cambia rol de otro a `profesor`/`estudiante`/`admin` → `204` y el rol efectivo cambia en el store (inmediatez verificada por R14).
+  - Test: cambiar el rol de **cualquier** `admin` (incluido uno mismo) → `409`/`422` y **no** muta el store.
+  - Test: moderar un post `borrador` ajeno → `409`/`422` sin publicar; `publicado ⇄ oculto` → `200` y el feed refleja el cambio; no-admin → `403`; id inexistente → `404`.
 
 ### R17 — OpenAPI sin fuga y bloqueado en producción (P1 · esta entrega · joya P1-secretos)
 
@@ -267,7 +267,7 @@ Cada requisito indica su prioridad (P0/P1/P2), cuándo aplica (**scaffold** ahor
 | R13 Login y sesión stateless | P0 | esta entrega | P0 credenciales/sesiones |
 | R14 Rol fresco por petición | P0 | esta entrega | P0 acceso |
 | R15 Posts: propietario/admin + visibilidad | P0 | esta entrega | P0 publicaciones/acceso |
-| R16 Admin: enforcement server-side | P0 | esta entrega | P0 acceso |
+| R16 Admin: enforcement server-side + rol `admin` inmutable | P0 | esta entrega | P0 acceso |
 | R17 OpenAPI sin fuga / bloqueado en prod | P1 | esta entrega | P1 secretos |
 | R18 Perfiles y anti-enumeración | P1 | esta entrega | P1 API |
 
@@ -279,7 +279,7 @@ Cada requisito indica su prioridad (P0/P1/P2), cuándo aplica (**scaffold** ahor
 - El **rate limiting en memoria** no escala a multi-instancia; aceptado para MVP, se migra a Redis en despliegue multi-replica (nota para `devops`).
 - **Sesión stateless JWT**: un token robado sigue siendo válido hasta su expiración (24 h) salvo lista negra en memoria; mitigaciones: expiración corta + sliding, `httpOnly`/`Secure`, CSRF y rotación en login. La lista negra en memoria se pierde al reiniciar la API (aceptado para MVP; en PostgreSQL se podrá revocar de forma persistente).
 - **Almacenamiento en memoria**: los datos de usuario/publicaciones/sesiones se pierden al reiniciar el proceso. Es coherente con el MVP y con la migración planificada a PostgreSQL; no es un almacén de producción durable.
-- **Admin auto-democión**: un admin puede cambiarse su propio rol y quedarse sin acceso admin (lock-out). Asumido y documentado en `api-structure.md` §9.5; el `red-team` lo probará.
+- **Rol `admin` inmutable**: el lock-out por auto-democión dejó de ser riesgo residual — R16 lo convierte en **control** (ninguna transición sale de `admin`, decisión 2026-10-09). El alta/baja de administradores pasa a ser operativa (seed/ambiente); el `red-team` verificará que el endpoint rechaza toda salida de `admin` y que no existe vía de UI/API para crear o quitar el primer admin.
 - **Suply chain (S10)**: mantener lockfile de `apps/api` versionado, `pnpm` con `allowBuilds` restringido (ya configurado en `pnpm-workspace.yaml`) y `pnpm audit` en CI (coordinación con `devops`).
 - La **terminación TLS** es responsabilidad del proxy; la API asume que llega HTTPS en producción (los flags `Secure` de cookies dependen de ello).
 

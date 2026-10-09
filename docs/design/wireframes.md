@@ -12,7 +12,7 @@ por área viven en archivos propios:
 | Publicaciones `/posts/*`      | [`wireframes_posts.md`](wireframes_posts.md) | [`wireframes_posts.md`](wireframes_posts.md) (documento único) |
 | Detalle `/posts/[id]`         | [`wireframes_post_detail.md`](wireframes_post_detail.md) | [`wireframes_post_detail.md`](wireframes_post_detail.md) (documento único) |
 | Perfil `/profile/[username]`  | [`wireframes_profile.md`](wireframes_profile.md) | [`wireframes_profile.md`](wireframes_profile.md) (documento único) |
-| Admin `/admin`                | §3.4 de este documento                   | —                       |
+| Admin `/admin`                | [`wireframes_admin.md`](wireframes_admin.md) | [`wireframes_admin.md`](wireframes_admin.md) (documento único) |
 
 > [!NOTE]
 > Los wireframes de la bienvenida se movieron a `wireframes_welcome.md` y los de
@@ -124,19 +124,19 @@ cascada vertical con las mismas reglas de visibilidad.
 
 ### 3.4 `/admin` (solo rol admin)
 
-```
-│ Gestión de usuarios                 [Buscar…]
-│ ┌────────────┬───────────┬───────────┐
-│ │ Usuario    │ Rol actual│ [▾] Cambiar│   ← asignar rol/permisos
-│ │ @j.rivas   │ Estudiante│ [Profesor] │
-│ │ @m.perez   │ Profesor   │ [Admin]    │
-│ └────────────┴───────────┴───────────┘
-```
+Especificación completa en [`wireframes_admin.md`](wireframes_admin.md): gestión
+de usuarios con asignación de rol, moderación de visibilidad de publicaciones
+(`publicado ⇄ oculto`), bloqueo de auto-democión y del último admin,
+accesibilidad, tokens y contrato de seguridad para el backend.
 
-Asignar roles es la única función de `/admin` durante el MVP. Como el registro
-público no ofrece selector de rol, esta pantalla es el único punto por el que
-un usuario puede pasar de `estudiante` a `profesor` o `admin`
-([`auth.md`](auth.md) §10.2).
+> [!NOTE]
+> Este apartado pasó a ser un puntero por el mismo motivo que §3.1, §3.2 y §3.3:
+> el esbozo ASCII que había aquí quedó corto ante la spec real. La pantalla se
+> implementó el 2026-10-08 **sin** especificación previa (desvío registrado en
+> [`progress.md`](../architecture/progress.md)); `wireframes_admin.md`
+> (2026-10-09) formaliza y corrige ese diseño. Asignar roles es el único punto
+> por el que un usuario pasa de `estudiante` a `profesor` o `admin`, porque el
+> registro público no ofrece selector de rol ([`auth.md`](auth.md) §10.2).
 
 ## 4. Decisión del mecanismo de filtrado (justificación)
 

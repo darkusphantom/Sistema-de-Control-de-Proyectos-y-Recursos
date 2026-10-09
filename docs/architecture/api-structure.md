@@ -510,17 +510,17 @@ export const FeedQuerySchema = z.object({
 
 | Ruta | Método | Acceso | Request | Respuesta | Enforcement |
 | --- | --- | --- | --- | --- | --- |
-| `/admin/users/:id/role` | PATCH | solo `admin` | `SetUserRoleSchema` | `204` | rol admin verificado en servidor por petición (R16) |
+| `/admin/users/:id/role` | PATCH | solo `admin` | `SetUserRoleSchema` | `204` \| `404` \| `409`/`422` | rol admin verificado en servidor por petición (R16) |
 
-Cambia `role` en el store; el efecto es inmediato para la siguiente petición (rol fresco, R14). `id` inexistente → `404`. Un admin puede cambiarse el rol a sí mismo (riesgo de lock-out asumido en el MVP; lo probará el `red-team`).
+Cambia `role` en el store; el efecto es inmediato para la siguiente petición (rol fresco, R14). `id` inexistente → `404`. **El rol `admin` es inmutable** (decisión de producto 2026-10-09, `wireframes_admin.md` §1.4 D2): el endpoint rechaza (`409`/`422`) toda transición que salga de `admin`, tanto propia como de otro admin. Ya **no** es un riesgo asumido: convierte el lock-out en control (R16 de `threat-model-api.md`). El alta/baja de administradores es operativa (seed/ambiente), no por API.
 
 ### 9.6 Admin (moderación de publicaciones)
 
 | Ruta | Método | Acceso | Request | Respuesta | Enforcement |
 | --- | --- | --- | --- | --- | --- |
-| `/admin/posts/:id/visibility` | PATCH | solo `admin` | `AdminSetVisibilitySchema` | `200` `Post` \| `404` | rol admin (R16) |
+| `/admin/posts/:id/visibility` | PATCH | solo `admin` | `AdminSetVisibilitySchema` | `200` `Post` \| `404` \| `409`/`422` | rol admin (R16) |
 
-Oculta (`visibility: "oculto"`) o restaura (`"publicado"`) cualquier publicación. Es el **único** camino para fijar `oculto` (el autor no puede). `404` si el id no existe. La visibilidad resultante se refleja de inmediato en el feed (R15).
+Oculta (`visibility: "oculto"`) o restaura (`"publicado"`) una publicación **ya publicada** (nunca un `borrador` ajeno: el endpoint rechaza (`409`/`422`) moderar un post en `borrador`, F-03). Es el **único** camino para fijar `oculto` (el autor no puede). `404` si el id no existe. La visibilidad resultante se refleja de inmediato en el feed (R15).
 
 ---
 
