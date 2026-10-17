@@ -8,39 +8,7 @@
  * 4. Lógica de dominio puro
  */
 
-// ─── Taxonomía ───────────────────────────────────────────────────────────────
-
-export {
-  POST_TYPES,
-  type PostType,
-} from "./taxonomy/post-type";
-
-export {
-  POST_CATEGORIES,
-  type PostCategory,
-} from "./taxonomy/post-category";
-
-export {
-  RESEARCH_AREA,
-  type ResearchArea,
-} from "./taxonomy/research-area";
-
-export {
-  POST_VISIBILITIES,
-  type PostVisibility,
-} from "./taxonomy/post-visibility";
-
 // ─── Tipos de dominio ─────────────────────────────────────────────────────────
-
-export type {
-  Post,
-  PostDraft,
-  UpdatePost,
-  PostPage,
-  PageOptions,
-  PostFormValues,
-  PostSubmitIntent,
-} from "./types/post";
 
 export type {
   UserRole,
@@ -50,31 +18,9 @@ export type {
 
 export type { Session } from "./types/session";
 
-export {
-  DEFAULT_POST_FILTERS,
-  POSTS_PAGE_SIZE,
-  type PostFilters,
-} from "./types/filters";
-
 export type { Page } from "./types/pagination";
 
 // ─── Esquemas Zod ─────────────────────────────────────────────────────────────
-
-export {
-  postCategorySchema,
-  postTypeSchema,
-  researchAreaSchema,
-  postVisibilitySchema,
-  authorVisibilitySchema,
-  PostDraftSchema,
-  UpdatePostSchema,
-  AdminUpdatePostSchema,
-  AdminSetVisibilitySchema,
-  FeedQuerySchema,
-  postSchema,
-  postPageSchema,
-  authorOptionSchema,
-} from "./schemas/post";
 
 export {
   emailSchema,
@@ -99,21 +45,5 @@ export {
   avatarDataUrlSchema,
   UpdateProfileSchema,
   ChangePasswordSchema,
-} from "./schemas/profile";
-
-// ─── Lógica de dominio puro ───────────────────────────────────────────────────
-
-export {
-  canViewPost,
-  filterVisiblePosts,
-} from "./domain/can-view-post";
-
-export {
-  normalizeSearchText,
-  fromSearchParams,
-  toSearchParams,
-  countActiveFilters,
-  isDateRangeValid,
-  describeActiveFilters,
-  applyFilters,
-} from "./domain/filters";
+  authorOptionSchema,
+} from "./schemas/user";

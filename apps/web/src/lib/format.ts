@@ -57,5 +57,3 @@ export function truncateText(text: string, maxLength = 160): string {
 
   return `${text.slice(0, maxLength).trimEnd()}…`;
 }
-
-export { extractKeywords } from "./keywords";

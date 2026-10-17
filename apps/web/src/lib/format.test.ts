@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, truncateText, extractKeywords } from "./format";
+import { formatDate, truncateText } from "./format";
 
 describe("formatDate", () => {
   it("formats a valid ISO date in Spanish by default", () => {
@@ -26,23 +26,5 @@ describe("truncateText", () => {
 
   it("trims trailing whitespace before appending the ellipsis", () => {
     expect(truncateText("hello  world", 7)).toBe("hello…");
-  });
-});
-
-describe("extractKeywords", () => {
-  it("extracts hashtags with their pound sign", () => {
-    expect(extractKeywords("This is a #test of #hashtags")).toEqual(["#test", "#hashtags"]);
-  });
-
-  it("normalizes to lowercase and removes accents", () => {
-    expect(extractKeywords("#Área #Público #Investigación")).toEqual(["#area", "#publico", "#investigacion"]);
-  });
-
-  it("returns unique hashtags", () => {
-    expect(extractKeywords("#test #test #Test")).toEqual(["#test"]);
-  });
-
-  it("returns an empty array when there are no hashtags", () => {
-    expect(extractKeywords("No hashtags here")).toEqual([]);
   });
 });

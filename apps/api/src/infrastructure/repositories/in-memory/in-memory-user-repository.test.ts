@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import type { Post } from "../../../domain/post";
 import type { StoredUser } from "./user-store";
 import { MemoryUserStore } from "./user-store";
 import { InMemoryUserRepository } from "./in-memory-user-repository";
@@ -20,27 +19,6 @@ function makeStoredUser(overrides: Partial<StoredUser> = {}): StoredUser {
     givenName: "Ana",
     familyName: "Rivas",
     role: "estudiante",
-    ...overrides,
-  };
-}
-
-/**
- * Crea una publicación mínima para poblar el store.
- */
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    id: "p-1",
-    title: "Test",
-    content: "Body",
-    authorId: "u-1",
-    category: "matematicas",
-    type: "post",
-    researchArea: "general",
-    visibility: "publicado",
-    publishedAt: "2026-03-01T00:00:00Z",
-    createdAt: "2026-03-01T00:00:00Z",
-    updatedAt: "2026-03-01T00:00:00Z",
-    imageUrl: null,
     ...overrides,
   };
 }
@@ -93,16 +71,15 @@ describe("InMemoryUserRepository", () => {
     expect(await repo.updateRole("missing", "admin")).toBeNull();
   });
 
-  it("listAuthors returns only users with at least one post", async () => {
+  it("listAuthors returns every registered user as a light option", async () => {
     const store = new MemoryUserStore();
     store.saveUser(makeStoredUser({ id: "u-1", username: "a.rivas", givenName: "Ana", familyName: "Rivas" }));
     store.saveUser(makeStoredUser({ id: "u-2", username: "b.gomez", email: "b@correo.com", givenName: "Bruno", familyName: "Gomez" }));
-    store.savePost(makePost({ authorId: "u-2" }));
     const repo = new InMemoryUserRepository(store);
 
     const authors = await repo.listAuthors();
-    expect(authors).toHaveLength(1);
-    expect(authors[0]).toEqual({ id: "u-2", username: "b.gomez", fullName: "Bruno Gomez" });
+    expect(authors).toHaveLength(2);
+    expect(authors).toContainEqual({ id: "u-2", username: "b.gomez", fullName: "Bruno Gomez" });
   });
 
   it("listAuthors sorts by fullName using the es locale", async () => {
@@ -110,9 +87,6 @@ describe("InMemoryUserRepository", () => {
     store.saveUser(makeStoredUser({ id: "u-1", username: "a.rivas", givenName: "Ana", familyName: "Rivas" }));
     store.saveUser(makeStoredUser({ id: "u-2", username: "z.avila", email: "z@correo.com", givenName: "Zulay", familyName: "Avila" }));
     store.saveUser(makeStoredUser({ id: "u-3", username: "c.barrios", email: "c@correo.com", givenName: "Carla", familyName: "Barrios" }));
-    store.savePost(makePost({ authorId: "u-1" }));
-    store.savePost(makePost({ id: "p-2", authorId: "u-2" }));
-    store.savePost(makePost({ id: "p-3", authorId: "u-3" }));
     const repo = new InMemoryUserRepository(store);
 
     const names = (await repo.listAuthors()).map((a) => a.fullName);
@@ -122,7 +96,6 @@ describe("InMemoryUserRepository", () => {
   it("listAuthors never includes email or role fields", async () => {
     const store = new MemoryUserStore();
     store.saveUser(makeStoredUser());
-    store.savePost(makePost());
     const repo = new InMemoryUserRepository(store);
 
     const authors = await repo.listAuthors();

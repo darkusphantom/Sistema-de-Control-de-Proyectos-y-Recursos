@@ -2,11 +2,9 @@ import { Hono } from "hono";
 import { pino } from "pino";
 import type { Logger } from "pino";
 import type { Env } from "./config/env";
-import type { PostRepository } from "./domain/post";
 import type { UserRepository } from "./domain/user";
 import type { AppAuth } from "./infrastructure/auth/auth.config";
 import { createAuth } from "./infrastructure/auth/auth.config";
-import { InMemoryPostRepository } from "./infrastructure/repositories/in-memory/in-memory-post-repository";
 import { InMemoryUserRepository } from "./infrastructure/repositories/in-memory/in-memory-user-repository";
 import { MemoryUserStore } from "./infrastructure/repositories/in-memory/user-store";
 import { bodyLimitMiddleware } from "./middleware/body-limit";
@@ -21,7 +19,6 @@ import { securityHeaders } from "./middleware/security-headers";
 import { registerAdminRoutes } from "./routes/admin.routes";
 import { registerAuthRoutes } from "./routes/auth.routes";
 import { registerOpenApiRoutes } from "./routes/openapi";
-import { registerPostRoutes } from "./routes/posts.routes";
 import type { RouteDeps } from "./routes/route-deps";
 import { registerUserRoutes } from "./routes/users.routes";
 
@@ -41,8 +38,6 @@ export type AppOptions = {
   store: MemoryUserStore;
   /** Instancia de Better Auth (por defecto se construye con `createAuth`). */
   auth?: AppAuth;
-  /** Repositorio de posts (por defecto `InMemoryPostRepository`). */
-  posts?: PostRepository;
   /** Repositorio de usuarios (por defecto `InMemoryUserRepository`). */
   users?: UserRepository;
 };
@@ -62,7 +57,6 @@ export type AppOptions = {
 export function createApp(options: AppOptions): Hono {
   const { env, logger = pino({ level: env.LOG_LEVEL }) } = options;
   const store = options.store;
-  const posts = options.posts ?? new InMemoryPostRepository(store);
   const users = options.users ?? new InMemoryUserRepository(store);
   const auth = options.auth ?? createAuth(env, store);
   const limiter = new MemoryRateLimiter(
@@ -74,7 +68,6 @@ export function createApp(options: AppOptions): Hono {
     env,
     auth,
     users,
-    posts,
     limiter,
     trustedOrigins,
     logger,
@@ -95,7 +88,6 @@ export function createApp(options: AppOptions): Hono {
   );
 
   registerAuthRoutes(app, deps);
-  registerPostRoutes(app, deps);
   registerUserRoutes(app, deps);
   registerAdminRoutes(app, deps);
   registerOpenApiRoutes(app, deps);

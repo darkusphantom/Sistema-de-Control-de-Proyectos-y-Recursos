@@ -80,4 +80,23 @@ describe("LoginForm", () => {
       expect((usernameInput as HTMLInputElement).value).toBe("wrong");
     });
   });
+
+  it("revalidates a single field on blur after the first submit", async () => {
+    render(<LoginForm />);
+
+    // Primer envío inválido: marca el formulario como enviado.
+    fireEvent.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    expect(screen.getAllByText("Escribe tu usuario.").length).toBeGreaterThan(0);
+
+    // Corregir el usuario y salir del campo limpia su error en línea.
+    const usernameInput = screen.getByLabelText("Usuario");
+    fireEvent.change(usernameInput, { target: { value: "m.rivas" } });
+    fireEvent.blur(usernameInput);
+    expect(screen.queryByText("Escribe tu usuario.")).toBeNull();
+
+    // La contraseña vacía sigue marcada al salir del campo.
+    const passwordInput = screen.getByLabelText("Contraseña");
+    fireEvent.blur(passwordInput);
+    expect(screen.getAllByText("Escribe tu contraseña.").length).toBeGreaterThan(0);
+  });
 });

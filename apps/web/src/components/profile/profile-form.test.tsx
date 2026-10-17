@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ProfileForm } from "./profile-form";
+import { updateProfileAction } from "@/app/(main)/profile/actions";
 import type { User } from "@/lib/types";
 
 // Mock the action
@@ -20,6 +21,11 @@ describe("ProfileForm", () => {
     bio: "Bio original",
   };
 
+  beforeEach(() => {
+    vi.mocked(updateProfileAction).mockClear();
+    vi.mocked(updateProfileAction).mockResolvedValue({ success: true });
+  });
+
   it("renders with user data", () => {
     const onCancel = vi.fn();
     const onSuccess = vi.fn();
@@ -38,5 +44,60 @@ describe("ProfileForm", () => {
     
     fireEvent.click(screen.getByText("Cancelar"));
     expect(onCancel).toHaveBeenCalled();
+  });
+
+  it("submits the form and calls onSuccess", async () => {
+    const onSuccess = vi.fn();
+    render(<ProfileForm user={user} onCancel={vi.fn()} onSuccess={onSuccess} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalled());
+    expect(updateProfileAction).toHaveBeenCalled();
+  });
+
+  it("shows inline and summary errors when the action fails", async () => {
+    vi.mocked(updateProfileAction).mockResolvedValueOnce({
+      success: false,
+      error: "Revisa los campos del formulario.",
+      fieldErrors: { email: "Correo inválido." },
+    });
+    const onSuccess = vi.fn();
+    render(<ProfileForm user={user} onCancel={vi.fn()} onSuccess={onSuccess} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Revisa los campos del formulario.",
+      );
+    });
+    expect(screen.getAllByText("Correo inválido.").length).toBeGreaterThan(0);
+    expect(onSuccess).not.toHaveBeenCalled();
+    // El formulario vuelve a estar habilitado tras el error.
+    expect(screen.getByRole("button", { name: "Guardar cambios" })).toBeEnabled();
+  });
+
+  it("copies the username to the clipboard and announces it politely", () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+    render(<ProfileForm user={user} onCancel={vi.fn()} onSuccess={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Copiar/ }));
+
+    expect(writeText).toHaveBeenCalledWith("@jperez");
+  });
+
+  it("updates the bio character counter while typing", () => {
+    render(<ProfileForm user={user} onCancel={vi.fn()} onSuccess={vi.fn()} />);
+
+    fireEvent.change(screen.getByLabelText("Bio"), {
+      target: { value: "Hola" },
+    });
+
+    expect(screen.getByText("4 / 160")).toBeInTheDocument();
   });
 });

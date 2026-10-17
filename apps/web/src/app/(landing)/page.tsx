@@ -1,45 +1,30 @@
-"use client";
-
-import { useRouter } from "next/navigation";
-import { markOnboardingAsSeen } from "@/lib/onboarding";
-import { WelcomeGate } from "@/components/landing/welcome-gate";
-import { LandingHeader } from "@/components/landing/landing-header";
-import { LandingSlider } from "@/components/landing/landing-slider";
-import { LandingFooter } from "@/components/landing/landing-footer";
+import Link from "next/link";
 
 /**
- * Welcome Screen of Red FaCyT (public route group `(landing)`).
+ * Landing page placeholder — pivot a "Sistema de Control de Proyectos".
  *
- * Renders the lightweight mobile-first interactive carousel/slider introducing
- * the platform features and pillars (`docs/design/welcome.md`). Recurrent visitors
- * are redirected to `/login` via {@link WelcomeGate}.
+ * La bienvenida estilo gaceta de Red FaCyT fue retirada en el pivot; esta
+ * página es un marcador mínimo para mantener viva la ruta `/` hasta que el
+ * agente `designer` entregue el nuevo brief y wireframes (fase 2 del pivot).
+ *
+ * @returns Marcador público de bienvenida con enlace a login.
  */
 export default function LandingPage() {
-  const router = useRouter();
-
-  const handleSkip = () => {
-    markOnboardingAsSeen();
-    router.push("/login");
-  };
-
-  const handleFinish = (target: "register" | "login") => {
-    if (target === "register") {
-      markOnboardingAsSeen();
-      router.push("/register");
-    } else {
-      router.push("/login");
-    }
-  };
-
   return (
-    <WelcomeGate>
-      <div className="flex min-h-dvh flex-col bg-slate-950 text-slate-100">
-        <LandingHeader onSkip={handleSkip} />
-        <main id="contenido" className="flex flex-1 flex-col items-center justify-center py-6 sm:py-10">
-          <LandingSlider onFinishOnboarding={handleFinish} />
-        </main>
-        <LandingFooter />
-      </div>
-    </WelcomeGate>
+    <main className="min-h-dvh flex flex-col items-center justify-center gap-6 px-6 text-center">
+      <h1 className="text-3xl font-bold text-text">
+        Sistema de Control de Proyectos y Recursos
+      </h1>
+      <p className="text-text-muted max-w-md">
+        La nueva bienvenida se está diseñando. Mientras tanto, puedes acceder al
+        sistema.
+      </p>
+      <Link
+        href="/login"
+        className="rounded-md bg-accent px-6 py-2 font-medium text-white"
+      >
+        Iniciar sesión
+      </Link>
+    </main>
   );
 }

@@ -17,19 +17,20 @@ export class InMemoryUserRepository implements UserRepository {
   constructor(private readonly store: MemoryUserStore) {}
 
   /**
-   * Devuelve los autores con al menos una publicación, ordenados por nombre
-   * completo con locale `"es"`. Solo `{ id, username, fullName }`: nunca email
-   * ni rol (R18).
+   * Devuelve los usuarios registrados como opciones ligeras, ordenados por
+   * nombre completo con locale `"es"`. Solo `{ id, username, fullName }`:
+   * nunca email ni rol (R18).
    *
-   * Complejidad: O(n log n) dominado por el orden; el filtro es O(n).
+   * Nota transitoria del pivot: hasta la reconversión a `listByRole` (fase 2
+   * del pivot), devuelve todos los usuarios del store.
    *
-   * @returns Opciones de autor.
+   * Complejidad: O(n log n) dominado por el orden; el mapeo es O(n).
+   *
+   * @returns Opciones de usuario.
    */
   async listAuthors(): Promise<AuthorOption[]> {
-    const authorIds = new Set(this.store.allPosts().map((post) => post.authorId));
     const authors: AuthorOption[] = this.store
       .allUsers()
-      .filter((user) => authorIds.has(user.id))
       .map((user) => ({
         id: user.id,
         username: user.username,

@@ -1,6 +1,5 @@
 import type { AppAuth } from "../infrastructure/auth/auth.config";
 import type { Env } from "../config/env";
-import type { PostRepository } from "../domain/post";
 import type { UserRepository } from "../domain/user";
 import type { MemoryRateLimiter } from "../middleware/rate-limit";
 import type { Logger } from "pino";
@@ -16,7 +15,6 @@ export type RouteDeps = {
   env: Env;
   auth: AppAuth;
   users: UserRepository;
-  posts: PostRepository;
   limiter: MemoryRateLimiter;
   /** Orígenes permitidos (whitelist CORS) para el middleware de CSRF. */
   trustedOrigins: string[];

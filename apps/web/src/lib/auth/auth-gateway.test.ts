@@ -104,4 +104,25 @@ describe("StaticAuthGateway", () => {
       expect(localStorage.getItem(SESSION_KEY)).toBeNull();
     });
   });
+
+  describe("changePassword", () => {
+    it("simulates success when there is an active session", async () => {
+      const mockSession = {
+        user: { id: "1", username: "test", role: "estudiante" },
+        expiresAt: new Date(Date.now() + 10000).toISOString(),
+      };
+      localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));
+
+      const result = await gateway.changePassword("secreto123", "nuevaclave123");
+      expect(result.success).toBe(true);
+    });
+
+    it("fails when there is no session", async () => {
+      const result = await gateway.changePassword("secreto123", "nuevaclave123");
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("No hay sesión activa.");
+      }
+    });
+  });
 });

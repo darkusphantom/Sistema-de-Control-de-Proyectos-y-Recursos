@@ -56,8 +56,8 @@ describe("OpenAPI routes", () => {
     ).json()) as {
       paths: Record<string, { post?: { security?: unknown } }>;
     };
-    const createPost = doc.paths["/api/v1/posts"]?.post;
-    expect(createPost?.security).toEqual([
+    const logout = doc.paths["/api/v1/auth/logout"]?.post;
+    expect(logout?.security).toEqual([
       { sessionCookie: [], csrfHeader: [] },
     ]);
   });

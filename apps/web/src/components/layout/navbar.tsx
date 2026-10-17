@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
-import { buttonStyles } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { UserIcon, PlusIcon } from "@/components/ui/icons";
+import { UserIcon } from "@/components/ui/icons";
 import { useSession } from "@/lib/session/session-provider";
 import { useState, useEffect, useRef } from "react";
 
@@ -17,7 +16,7 @@ type NavLink = {
 };
 
 const NAV_LINKS: NavLink[] = [
-  { href: "/feed", label: "Publicaciones" },
+  { href: "/dashboard", label: "Dashboard" },
   { href: "/profile", label: "Perfil" },
   { href: "/admin", label: "Administración", adminOnly: true },
 ];
@@ -25,15 +24,15 @@ const NAV_LINKS: NavLink[] = [
 /**
  * Main authenticated navigation bar.
  *
- * Design spec (`docs/design/wireframes_feed.md` §2.2):
- * - Sticky, not fixed — no scroll offset compensation needed.
- * - Three zones: brand (left), section links (centre, ≥768px only), actions (right).
- * - The amber `--accent` appears only on the "Nueva publicación" CTA button.
- * - Nav links are NOT shown on mobile; BottomNav handles mobile navigation.
- * - The account button opens a dropdown menu with `aria-expanded` + `aria-haspopup`.
- *   The menu closes on `Escape` and on click outside.
+ * Especificación de diseño (pendiente de rediseño en fase 2 del pivot):
+ * - Sticky, no fixed — sin compensación de scroll offset.
+ * - Tres zonas: marca (izquierda), enlaces de sección (centro, solo ≥768px),
+ *   acciones (derecha).
+ * - Los enlaces de sección NO se muestran en móvil; `BottomNav` se encarga.
+ * - El botón de cuenta abre un dropdown con `aria-expanded` + `aria-haspopup`.
+ *   El menú se cierra con `Escape` y con clic fuera.
  *
- * @returns The sticky navigation bar.
+ * @returns La barra de navegación sticky.
  */
 export function Navbar() {
   const pathname = usePathname();
@@ -87,7 +86,7 @@ export function Navbar() {
       >
         {/* ── Brand ── */}
         <Link
-          href="/feed"
+          href="/dashboard"
           className="font-display text-h3 text-primary hover:opacity-80 transition-opacity"
         >
           Red FaCyT
@@ -125,15 +124,6 @@ export function Navbar() {
 
         {/* ── Actions ── */}
         <div className="flex items-center gap-2">
-          <Link
-            href="/posts/new"
-            id="navbar-new-post"
-            className={buttonStyles({ variant: "primary", size: "sm" })}
-          >
-            <PlusIcon className="size-4" />
-            <span className="hidden sm:inline">Nueva publicación</span>
-          </Link>
-
           <ThemeToggle />
 
           {/* Account button with dropdown */}

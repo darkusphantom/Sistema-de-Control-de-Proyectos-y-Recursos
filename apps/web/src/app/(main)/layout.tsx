@@ -13,7 +13,7 @@ type MainLayoutProps = {
 /**
  * Authenticated shell layout for the `(main)` route group.
  *
- * Structure (`docs/design/wireframes_feed.md` §2.1):
+ * Structure:
  * 1. Skip link → focuses `#contenido` so keyboard users bypass the Navbar.
  * 2. `SessionProvider` — resolves the session from localStorage and redirects
  *    anonymous visitors to `/login` before rendering anything.
@@ -22,6 +22,9 @@ type MainLayoutProps = {
  *    accommodates the fixed `BottomNav` on mobile without overlapping content.
  * 5. `BottomNav` — fixed bottom bar, hidden on ≥768px.
  * 6. `Footer` — institutional `contentinfo` landmark.
+ *
+ * The `modal` slot stays reserved for App Router parallel-route modals
+ * (kept from the Red FaCyT pivot plan, decision #1).
  *
  * @param props - Layout props.
  * @returns The full authenticated shell.

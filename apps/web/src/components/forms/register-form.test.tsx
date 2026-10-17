@@ -93,4 +93,29 @@ describe("RegisterForm", () => {
       expect(passInput.value).toBe("password123");
     });
   });
+
+  it("revalidates a single field on blur after the first submit", async () => {
+    render(<RegisterForm />);
+
+    // Primer envío inválido: marca el formulario como enviado.
+    fireEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
+    expect(screen.getAllByText("Escribe tu nombre.").length).toBeGreaterThan(0);
+
+    // Corregir el nombre y salir del campo limpia su error en línea.
+    const nameInput = screen.getByLabelText("Nombre");
+    fireEvent.change(nameInput, { target: { value: "María" } });
+    fireEvent.blur(nameInput);
+    expect(screen.queryByText("Escribe tu nombre.")).toBeNull();
+
+    // Confirmar una contraseña que no coincide marca el error en blur.
+    fireEvent.change(screen.getByLabelText("Contraseña"), {
+      target: { value: "password123" },
+    });
+    const confirmInput = screen.getByLabelText("Confirmar contraseña");
+    fireEvent.change(confirmInput, { target: { value: "distinta123" } });
+    fireEvent.blur(confirmInput);
+    expect(
+      screen.getAllByText("Las contraseñas no coinciden.").length,
+    ).toBeGreaterThan(0);
+  });
 });

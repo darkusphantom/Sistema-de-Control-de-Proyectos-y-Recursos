@@ -21,11 +21,11 @@ describe("EmptyState", () => {
     render(
       <EmptyState
         title="Sin publicaciones"
-        action={{ label: "Crear publicación", href: "/posts/new" }}
+        action={{ label: "Ir al dashboard", href: "/dashboard" }}
       />,
     );
-    const link = screen.getByRole("link", { name: "Crear publicación" });
-    expect(link).toHaveAttribute("href", "/posts/new");
+    const link = screen.getByRole("link", { name: "Ir al dashboard" });
+    expect(link).toHaveAttribute("href", "/dashboard");
   });
 
   it("renders a button when action.onClick is provided", async () => {

@@ -18,7 +18,7 @@ export type OpenApiDocument = {
 /**
  * Documento OpenAPI 3.1 de la API (requisito R17).
  *
- * Solo formas wire (`Post`, `PostPage`, `AuthorOption`, `Session`, `User`) y
+ * Solo formas wire (`AuthorOption`, `Session`, `User`) y
  * cuerpos de petición; sin secretos, valores de env, rutas internas ni
  * esquemas de BD. La vía elegida es el **documento manual** (alternativa
  * aceptada por `api-structure.md` §10.1: "documento manual con
@@ -59,64 +59,6 @@ export const openApiDocument: OpenApiDocument = {
         properties: {
           error: { type: "string" },
           message: { type: "string" },
-        },
-      },
-      Post: {
-        type: "object",
-        required: [
-          "id",
-          "title",
-          "content",
-          "authorId",
-          "category",
-          "type",
-          "visibility",
-          "publishedAt",
-          "createdAt",
-          "updatedAt",
-          "imageUrl",
-        ],
-        properties: {
-          id: { type: "string" },
-          title: { type: "string" },
-          content: { type: "string" },
-          authorId: { type: "string" },
-          category: {
-            type: "string",
-            enum: ["noticias", "eventos", "defensas", "investigacion", "convocatorias"],
-          },
-          type: { type: "string", enum: ["post", "articulo", "ensenanza"] },
-          visibility: {
-            type: "string",
-            enum: ["publicado", "borrador", "oculto"],
-          },
-          publishedAt: { type: "string" },
-          createdAt: { type: "string" },
-          updatedAt: { type: "string" },
-          imageUrl: { type: "string", nullable: true },
-        },
-      },
-      PostPage: {
-        type: "object",
-        required: ["items", "total"],
-        properties: {
-          items: { type: "array", items: { $ref: "#/components/schemas/Post" } },
-          total: { type: "integer", minimum: 0 },
-        },
-      },
-      PostDraft: {
-        type: "object",
-        required: ["title", "content", "category", "type", "visibility"],
-        properties: {
-          title: { type: "string", maxLength: 200 },
-          content: { type: "string", maxLength: 10000 },
-          category: {
-            type: "string",
-            enum: ["noticias", "eventos", "defensas", "investigacion", "convocatorias"],
-          },
-          type: { type: "string", enum: ["post", "articulo", "ensenanza"] },
-          visibility: { type: "string", enum: ["publicado", "borrador"] },
-          imageUrl: { type: "string", nullable: true },
         },
       },
       AuthorOption: {
@@ -259,111 +201,9 @@ export const openApiDocument: OpenApiDocument = {
         },
       },
     },
-    "/api/v1/posts": {
-      get: {
-        summary: "Feed de publicaciones visibles",
-        security: sessionAuth(),
-        parameters: [
-          { name: "q", in: "query", schema: { type: "string" } },
-          { name: "categoria", in: "query", schema: { type: "string" } },
-          { name: "tipo", in: "query", schema: { type: "string" } },
-          { name: "autor", in: "query", schema: { type: "string" } },
-          { name: "estado", in: "query", schema: { type: "string" } },
-          { name: "desde", in: "query", schema: { type: "string" } },
-          { name: "hasta", in: "query", schema: { type: "string" } },
-          { name: "limit", in: "query", schema: { type: "integer", minimum: 1, maximum: 100 } },
-          { name: "offset", in: "query", schema: { type: "integer", minimum: 0 } },
-        ],
-        responses: {
-          200: {
-            description: "Página de publicaciones",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/PostPage" },
-              },
-            },
-          },
-          ...errorResponses(),
-        },
-      },
-      post: {
-        summary: "Crear publicación (authorId de la sesión)",
-        security: mutationAuth(),
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/PostDraft" },
-            },
-          },
-        },
-        responses: {
-          201: {
-            description: "Publicación creada",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/Post" },
-              },
-            },
-          },
-          ...errorResponses(),
-        },
-      },
-    },
-    "/api/v1/posts/{id}": {
-      get: {
-        summary: "Publicación por id",
-        security: sessionAuth(),
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        responses: {
-          200: {
-            description: "Publicación",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/Post" },
-              },
-            },
-          },
-          ...errorResponses(),
-        },
-      },
-      patch: {
-        summary: "Editar publicación (autor o admin)",
-        security: mutationAuth(),
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/PostDraft" },
-            },
-          },
-        },
-        responses: {
-          200: {
-            description: "Publicación actualizada",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/Post" },
-              },
-            },
-          },
-          ...errorResponses(),
-        },
-      },
-      delete: {
-        summary: "Eliminar publicación (autor o admin)",
-        security: mutationAuth(),
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        responses: {
-          204: { description: "Eliminada" },
-          ...errorResponses(),
-        },
-      },
-    },
     "/api/v1/users/authors": {
       get: {
-        summary: "Autores con publicaciones (sin email ni rol)",
+        summary: "Opciones de usuario (sin email ni rol)",
         security: sessionAuth(),
         responses: {
           200: {
@@ -383,25 +223,21 @@ export const openApiDocument: OpenApiDocument = {
     },
     "/api/v1/users/{username}": {
       get: {
-        summary: "Perfil público + publicaciones visibles",
+        summary: "Perfil público de usuario",
         security: sessionAuth(),
         parameters: [
           { name: "username", in: "path", required: true, schema: { type: "string" } },
         ],
         responses: {
           200: {
-            description: "Perfil y publicaciones",
+            description: "Perfil de usuario",
             content: {
               "application/json": {
                 schema: {
                   type: "object",
-                  required: ["user", "posts"],
+                  required: ["user"],
                   properties: {
                     user: { $ref: "#/components/schemas/User" },
-                    posts: {
-                      type: "array",
-                      items: { $ref: "#/components/schemas/Post" },
-                    },
                   },
                 },
               },
@@ -435,38 +271,6 @@ export const openApiDocument: OpenApiDocument = {
         },
         responses: {
           204: { description: "Rol actualizado" },
-          ...errorResponses(),
-        },
-      },
-    },
-    "/api/v1/admin/posts/{id}/visibility": {
-      patch: {
-        summary: "Moderar visibilidad (solo admin)",
-        security: mutationAuth(),
-        parameters: [{ name: "id", in: "path", required: true, schema: { type: "string" } }],
-        requestBody: {
-          required: true,
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                required: ["visibility"],
-                properties: {
-                  visibility: { type: "string", enum: ["publicado", "oculto"] },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          200: {
-            description: "Visibilidad actualizada",
-            content: {
-              "application/json": {
-                schema: { $ref: "#/components/schemas/Post" },
-              },
-            },
-          },
           ...errorResponses(),
         },
       },

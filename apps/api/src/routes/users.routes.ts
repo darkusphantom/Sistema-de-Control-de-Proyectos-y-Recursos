@@ -18,9 +18,9 @@ import { validationError } from "./helpers";
  * @param deps - Dependencias inyectadas.
  */
 export function registerUserRoutes(app: Hono, deps: RouteDeps): void {
-  const { auth, users, posts } = deps;
+  const { auth, users } = deps;
   const listAuthorsUseCase = listAuthors({ users });
-  const getProfileUseCase = getProfile({ users, posts });
+  const getProfileUseCase = getProfile({ users });
 
   app.get(
     "/api/v1/users/authors",

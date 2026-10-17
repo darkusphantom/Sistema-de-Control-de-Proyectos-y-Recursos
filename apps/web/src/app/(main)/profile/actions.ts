@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-import { StaticUserRepository } from "@/lib/repositories/post-repository.static";
+import { StaticUserRepository } from "@/lib/repositories/user-repository.static";
 import { validateUpdateProfile, validateChangePassword } from "@/lib/validation/profile";
 
 const userRepo = new StaticUserRepository();

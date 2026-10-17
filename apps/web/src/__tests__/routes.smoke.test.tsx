@@ -4,11 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import LoginPage from "@/app/(auth)/login/page";
 import RegisterPage from "@/app/(auth)/register/page";
 import LandingPage from "@/app/(landing)/page";
-import FeedPage from "@/app/(main)/feed/page";
-import PostDetailPage from "@/app/(main)/posts/[id]/page";
-import NewPostPage from "@/app/(main)/posts/new/page";
-import EditPostPage from "@/app/(main)/posts/[id]/edit/page";
-import DeletePostPage from "@/app/(main)/posts/[id]/delete/page";
+import DashboardPage from "@/app/(main)/dashboard/page";
 import ProfilePage from "@/app/(main)/profile/[username]/page";
 import AdminPage from "@/app/(main)/admin/page";
 
@@ -20,7 +16,7 @@ const { replace, push, back } = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace, push, back }),
-  usePathname: () => "/feed",
+  usePathname: () => "/dashboard",
   notFound: () => {
     throw new Error("NEXT_NOT_FOUND");
   },
@@ -41,10 +37,6 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("next/font/google", () => ({
-  Source_Serif_4: () => ({ variable: "--font-facyt-serif", className: "" }),
-}));
-
 beforeEach(() => {
   replace.mockClear();
   window.localStorage.clear();
@@ -58,7 +50,7 @@ describe("route smoke tests", () => {
   it("renders the landing page", () => {
     render(<LandingPage />);
     expect(
-      screen.getByRole("heading", { level: 1, name: /Red FaCyT/i }),
+      screen.getByRole("heading", { level: 1, name: /Sistema de Control de Proyectos/i }),
     ).toBeInTheDocument();
   });
 
@@ -74,35 +66,17 @@ describe("route smoke tests", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the feed page", async () => {
-    render(await FeedPage({ searchParams: Promise.resolve({}) }));
-    expect(await screen.findByRole("heading", { name: "Publicaciones" })).toBeInTheDocument();
-  });
-
-  it("renders the post detail page", async () => {
-    render(await PostDetailPage({ params: Promise.resolve({ id: "post-1" }) }));
-    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
-  });
-
-  it("renders the new post page", () => {
-    render(<NewPostPage />);
-    expect(screen.getByRole("heading", { name: "Crear publicación" })).toBeInTheDocument();
-  });
-
-  it("renders the edit post page", async () => {
-    render(await EditPostPage({ params: Promise.resolve({ id: "post-1" }) }));
-    expect(screen.getByRole("heading", { name: "Editar publicación" })).toBeInTheDocument();
-  });
-
-  it("renders the delete post page", async () => {
-    render(await DeletePostPage({ params: Promise.resolve({ id: "post-1" }) }));
-    expect(screen.getByRole("heading", { name: /¿Eliminar esta publicación\?/i })).toBeInTheDocument();
+  it("renders the dashboard page", () => {
+    render(<DashboardPage />);
+    expect(
+      screen.getByRole("heading", { level: 1, name: /Dashboard/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders the profile page", async () => {
     render(await ProfilePage({ params: Promise.resolve({ username: "m.rivas" }) }));
     expect(
-      await screen.findByRole("heading", { name: /Publicaciones/i }),
+      await screen.findByRole("heading", { level: 1, name: /María Rivas/i }),
     ).toBeInTheDocument();
   });
 

@@ -1,4 +1,3 @@
-import type { Post } from "../../../domain/post";
 import type { User, UserRole } from "../../../domain/user";
 
 /**
@@ -63,10 +62,10 @@ export type AuthRecord =
 /**
  * Única fuente de verdad en memoria del MVP (api-structure.md §11.1).
  *
- * `InMemoryUserRepository`, `InMemoryPostRepository` y el adaptador de auth de
- * Better Auth leen/escriben el MISMO store: un usuario registrado por Better
- * Auth queda visible para los casos de uso al instante y un cambio de rol por
- * admin es efectivo en la siguiente petición (R14).
+ * `InMemoryUserRepository` y el adaptador de auth de Better Auth leen/escriben
+ * el MISMO store: un usuario registrado por Better Auth queda visible para los
+ * casos de uso al instante y un cambio de rol por admin es efectivo en la
+ * siguiente petición (R14).
  *
  * Índices: `byUsername`/`byEmail` (O(1)) para las búsquedas del repositorio de
  * usuarios; el adaptador de auth recorre colecciones (O(n), n pequeño en el
@@ -79,7 +78,6 @@ export class MemoryUserStore {
   private readonly sessions = new Map<string, StoredSession>();
   private readonly accounts = new Map<string, StoredAccount>();
   private readonly verifications = new Map<string, StoredVerification>();
-  private readonly postsById = new Map<string, Post>();
 
   /**
    * Colección de auth por modelo (O(1)).
@@ -176,43 +174,5 @@ export class MemoryUserStore {
       role: stored.role,
       createdAt: stored.createdAt.toISOString(),
     };
-  }
-
-  /**
-   * Lista de publicaciones del store.
-   *
-   * @returns Arreglo de publicaciones.
-   */
-  allPosts(): Post[] {
-    return [...this.postsById.values()];
-  }
-
-  /**
-   * Busca una publicación por su id (O(1)).
-   *
-   * @param id - Id de la publicación.
-   * @returns La publicación, o `undefined`.
-   */
-  postById(id: string): Post | undefined {
-    return this.postsById.get(id);
-  }
-
-  /**
-   * Guarda una publicación.
-   *
-   * @param post - Publicación.
-   */
-  savePost(post: Post): void {
-    this.postsById.set(post.id, post);
-  }
-
-  /**
-   * Elimina una publicación.
-   *
-   * @param id - Id de la publicación.
-   * @returns `true` si existía.
-   */
-  removePost(id: string): boolean {
-    return this.postsById.delete(id);
   }
 }

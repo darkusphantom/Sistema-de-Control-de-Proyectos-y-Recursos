@@ -23,3 +23,14 @@ export {
   AVATAR_MIME_TYPES,
   AVATAR_DATA_URL_MAX_CHARS,
 } from "./profile";
+
+import { z } from "zod";
+
+/** `AuthorOption` wire: usuario ligero para listados (sin email ni rol). */
+export const authorOptionSchema = z
+  .object({
+    id: z.string(),
+    username: z.string(),
+    fullName: z.string(),
+  })
+  .strict();

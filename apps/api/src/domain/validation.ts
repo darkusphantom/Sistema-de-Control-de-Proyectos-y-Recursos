@@ -20,18 +20,6 @@ export {
   sessionSchema,
   userSchema,
   SetUserRoleSchema,
-  // Schemas de publicaciones
-  postCategorySchema,
-  postTypeSchema,
-  researchAreaSchema,
-  postVisibilitySchema,
-  authorVisibilitySchema,
-  PostDraftSchema,
-  UpdatePostSchema,
-  AdminUpdatePostSchema,
-  AdminSetVisibilitySchema,
-  FeedQuerySchema,
-  postSchema,
-  postPageSchema,
+  // Esquemas de usuario
   authorOptionSchema,
 } from "@redfacyt/shared";

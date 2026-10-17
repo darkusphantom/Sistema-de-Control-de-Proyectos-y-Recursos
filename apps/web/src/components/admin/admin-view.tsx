@@ -4,19 +4,19 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/session/session-provider";
 import { mockUsers } from "@/data/users";
-import { mockPosts } from "@/data/posts";
 import { ShieldIcon } from "@/components/ui/icons";
 import { AdminUsersSection } from "./admin-users-section";
-import { AdminPostsSection } from "./admin-posts-section";
-import type { User, UserRole, Post, PostVisibility } from "@/lib/types";
+import type { User, UserRole } from "@/lib/types";
 
 /**
- * Admin Dashboard view component for role assignment and content moderation.
+ * Admin Dashboard view component for role assignment.
  *
  * Design spec (`docs/design/wireframes_admin.md`):
  * - Restricted to `admin` role; redirects non-admin users to `/feed`.
- * - Interactive user management table with role assignment (estudiante, profesor, admin).
- * - Publication moderation table with visibility toggling (publicado, oculto).
+ * - Interactive user management table with role assignment.
+ *
+ * Note: the publication-moderation section was removed in the Red FaCyT
+ * pivot; catalogs, users and audit management will replace it.
  *
  * @returns The admin section dashboard view.
  */
@@ -25,7 +25,6 @@ export function AdminView() {
   const { session, status } = useSession();
 
   const [users, setUsers] = useState<User[]>(mockUsers);
-  const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [notice, setNotice] = useState<string | null>(null);
 
   const isAdmin = session?.user.role === "admin";
@@ -60,16 +59,6 @@ export function AdminView() {
     );
   };
 
-  const handlePostVisibilityChange = (postId: string, newVisibility: PostVisibility) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.id === postId ? { ...p, visibility: newVisibility } : p)),
-    );
-    const targetPost = posts.find((p) => p.id === postId);
-    setNotice(
-      `"${targetPost?.title}" ahora es ${newVisibility}.`,
-    );
-  };
-
   return (
     <div className="flex flex-col gap-8 py-4 max-w-6xl mx-auto">
       {/* ── Admin Header ── */}
@@ -83,7 +72,7 @@ export function AdminView() {
               Panel de Administración
             </h1>
             <p className="text-text-muted text-sm">
-              Gestión de usuarios, asignación de roles y moderación de contenido.
+              Gestión de usuarios y asignación de roles.
             </p>
           </div>
         </div>
@@ -100,7 +89,6 @@ export function AdminView() {
       </div>
 
       <AdminUsersSection users={users} onChangeRole={handleRoleChange} />
-      <AdminPostsSection posts={posts} onChangeVisibility={handlePostVisibilityChange} />
     </div>
   );
 }

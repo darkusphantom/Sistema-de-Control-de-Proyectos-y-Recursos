@@ -13,23 +13,6 @@ export type {
   User,
   Session,
   AuthorOption,
-  Post,
-  PostDraft,
-  UpdatePost,
-  PostPage,
-  PageOptions,
-  PostFormValues,
-  PostSubmitIntent,
-  PostFilters,
-  PostCategory,
-  PostType,
-  PostVisibility,
-  ResearchArea,
-} from "@redfacyt/shared";
-
-export {
-  DEFAULT_POST_FILTERS,
-  POSTS_PAGE_SIZE,
 } from "@redfacyt/shared";
 
 /**

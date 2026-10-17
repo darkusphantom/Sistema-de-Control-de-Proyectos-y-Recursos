@@ -1,27 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Post } from "../domain/post";
-import { InMemoryPostRepository } from "../infrastructure/repositories/in-memory/in-memory-post-repository";
 import { buildApp, jsonOf, promoteToAdmin, registerUser } from "./test-helpers";
 
 const ANA = { givenName: "Ana", familyName: "Rivas", email: "ana@correo.com", password: "secreto123" };
-
-function makePost(overrides: Partial<Post> = {}): Post {
-  return {
-    id: `p-${Math.random().toString(36).slice(2)}`,
-    title: "T",
-    content: "C",
-    authorId: "u",
-    category: "matematicas",
-    type: "post",
-    researchArea: "general",
-    visibility: "publicado",
-    publishedAt: "2026-03-01T00:00:00Z",
-    createdAt: "2026-03-01T00:00:00Z",
-    updatedAt: "2026-03-01T00:00:00Z",
-    imageUrl: null,
-    ...overrides,
-  };
-}
 
 describe("Admin routes · PATCH /api/v1/admin/users/:id/role", () => {
   it("forbids non-admin roles (estudiante and profesor)", async () => {
@@ -107,6 +87,23 @@ describe("Admin routes · PATCH /api/v1/admin/users/:id/role", () => {
     expect(blocked.status).toBe(403);
   });
 
+  it("returns 400 when the id fails idSchema (validationError branch)", async () => {
+    const { app, store } = buildApp();
+    const jar = await registerUser(app, ANA);
+    promoteToAdmin(store, "ana.rivas");
+    const longId = "a".repeat(65);
+    const response = await app.request(`/api/v1/admin/users/${longId}/role`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        "x-csrf-token": jar.get("facy.csrf_token") ?? "",
+        cookie: jar.header(),
+      },
+      body: JSON.stringify({ role: "admin" }),
+    });
+    expect(response.status).toBe(400);
+  });
+
   it("returns 404 for a non-existent user id", async () => {
     const { app, store } = buildApp();
     const jar = await registerUser(app, ANA);
@@ -119,89 +116,6 @@ describe("Admin routes · PATCH /api/v1/admin/users/:id/role", () => {
         cookie: jar.header(),
       },
       body: JSON.stringify({ role: "admin" }),
-    });
-    expect(response.status).toBe(404);
-  });
-});
-
-describe("Admin routes · PATCH /api/v1/admin/posts/:id/visibility", () => {
-  it("forbids non-admin and returns 404 for unknown posts", async () => {
-    const { app } = buildApp();
-    const jar = await registerUser(app, ANA);
-    const forbidden = await app.request("/api/v1/admin/posts/p-x/visibility", {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-        "x-csrf-token": jar.get("facy.csrf_token") ?? "",
-        cookie: jar.header(),
-      },
-      body: JSON.stringify({ visibility: "oculto" }),
-    });
-    expect(forbidden.status).toBe(403);
-  });
-
-  it("admin can hide and restore a post and the feed reflects it", async () => {
-    const { app, store } = buildApp();
-    const jar = await registerUser(app, ANA);
-    const otherJar = await registerUser(app, {
-      givenName: "Bruno",
-      familyName: "Gomez",
-      email: "bruno@correo.com",
-      password: "secreto123",
-    });
-    const anaId = store.userByUsername("ana.rivas")?.id ?? "u-a";
-    const posts = new InMemoryPostRepository(store);
-    posts.seed([makePost({ id: "p-1", authorId: anaId, visibility: "publicado" })]);
-    promoteToAdmin(store, "ana.rivas");
-
-    const hide = await app.request("/api/v1/admin/posts/p-1/visibility", {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-        "x-csrf-token": jar.get("facy.csrf_token") ?? "",
-        cookie: jar.header(),
-      },
-      body: JSON.stringify({ visibility: "oculto" }),
-    });
-    expect(hide.status).toBe(200);
-    expect((await jsonOf(hide)).visibility).toBe("oculto");
-
-    // El feed de otro usuario ya no lo muestra.
-    const feed = await app.request("/api/v1/posts", {
-      headers: { cookie: otherJar.header() },
-    });
-    const ids = ((await jsonOf(feed)).items as Array<{ id: string }>).map((p) => p.id);
-    expect(ids).not.toContain("p-1");
-
-    const restore = await app.request("/api/v1/admin/posts/p-1/visibility", {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-        "x-csrf-token": jar.get("facy.csrf_token") ?? "",
-        cookie: jar.header(),
-      },
-      body: JSON.stringify({ visibility: "publicado" }),
-    });
-    expect(restore.status).toBe(200);
-    const feedAfter = await app.request("/api/v1/posts", {
-      headers: { cookie: otherJar.header() },
-    });
-    const idsAfter = ((await jsonOf(feedAfter)).items as Array<{ id: string }>).map((p) => p.id);
-    expect(idsAfter).toContain("p-1");
-  });
-
-  it("returns 404 for a non-existent post id", async () => {
-    const { app, store } = buildApp();
-    const jar = await registerUser(app, ANA);
-    promoteToAdmin(store, "ana.rivas");
-    const response = await app.request("/api/v1/admin/posts/nope/visibility", {
-      method: "PATCH",
-      headers: {
-        "content-type": "application/json",
-        "x-csrf-token": jar.get("facy.csrf_token") ?? "",
-        cookie: jar.header(),
-      },
-      body: JSON.stringify({ visibility: "oculto" }),
     });
     expect(response.status).toBe(404);
   });

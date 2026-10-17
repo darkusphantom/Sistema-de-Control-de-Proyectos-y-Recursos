@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
-import { HomeIcon, PlusIcon, UserIcon, ShieldIcon } from "@/components/ui/icons";
+import { HomeIcon, UserIcon, ShieldIcon } from "@/components/ui/icons";
 import { useSession } from "@/lib/session/session-provider";
 import type { ReactNode } from "react";
 
@@ -17,20 +17,18 @@ type NavDestination = {
 };
 
 /**
- * Fixed bottom navigation bar shown on mobile (`< 768px`).
+ * Barra de navegación inferior fija mostrada en móvil (`< 768px`).
  *
- * Design spec (`docs/design/wireframes_feed.md` §2.3):
- * - `md:hidden` — disappears on desktop; the Navbar handles desktop nav.
- * - Four destinations: Feed, Crear, Perfil, Administración (admin only).
- * - With a non-admin user only three destinations are shown; Perfil keeps its
- *   position in the layout.
- * - The active destination uses `--accent-teal` and `aria-current="page"`.
- *   The inactive icon has no fill; the active icon gains `fill-current`.
- * - `pb-[env(safe-area-inset-bottom)]` prevents the bar from overlapping the
- *   home indicator on iOS.
- * - `min-h-14` (56px) ensures reachable touch targets.
+ * Especificación de diseño (pendiente de rediseño en fase 2 del pivot):
+ * - `md:hidden` — desaparece en desktop; el `Navbar` maneja la navegación.
+ * - Tres destinos: Dashboard, Perfil y Administración (solo admin). Con un
+ *   usuario no admin solo se muestran dos.
+ * - El destino activo usa `--accent-teal` y `aria-current="page"`.
+ * - `pb-[env(safe-area-inset-bottom)]` evita que la barra solape el indicador
+ *   de inicio en iOS.
+ * - `min-h-14` (56px) asegura objetivos táctiles alcanzables.
  *
- * @returns The fixed bottom navigation bar, hidden on ≥768px.
+ * @returns La barra de navegación inferior fija, oculta en ≥768px.
  */
 export function BottomNav() {
   const pathname = usePathname();
@@ -41,16 +39,10 @@ export function BottomNav() {
 
   const destinations: NavDestination[] = [
     {
-      href: "/feed",
-      label: "Feed",
+      href: "/dashboard",
+      label: "Dashboard",
       icon: <HomeIcon className="size-6" />,
-      matchPrefix: "/feed",
-    },
-    {
-      href: "/posts/new",
-      label: "Crear",
-      icon: <PlusIcon className="size-6" />,
-      matchPrefix: "/posts/new",
+      matchPrefix: "/dashboard",
     },
     {
       href: (u) => `/profile/${u}`,
