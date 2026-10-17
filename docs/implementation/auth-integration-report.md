@@ -1,5 +1,7 @@
 # Reporte de Integración: Módulo de Autenticación (`/login` y `/register`)
 
+> **Informe histórico**: refleja la entrega pre-pivot. Tras el pivot (2026-10-17) los roles son `coordinador`/`aprobador`/`admin_sistema`, el registro solo crea `coordinador` y el destino post-login es `/dashboard` (antes `/feed`).
+
 ## 1. Resumen Ejecutivo
 Se implementó la capa completa de la vista de autenticación para las rutas `/login` y `/register`, siguiendo el patrón de arquitectura por capas (UI → Validation → Repository / Gateway) y la estrategia TDD.
 

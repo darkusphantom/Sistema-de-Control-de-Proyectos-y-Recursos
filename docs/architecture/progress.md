@@ -52,37 +52,41 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | Implementación completa de vistas protegidas | `/posts/[id]` (detalle de publicación, `PostDetail`, `PostDetailPage`, `setVisibilityAction`), `/posts/new` y `/posts/[id]/{edit,delete}` páginas de ruta reales/fallback standalone, `/profile` y `/profile/[username]` (perfil de usuario y publicaciones propias), y `/admin` (panel de gestión de usuarios, asignación de roles y moderación con guard de acceso). Módulos `src/lib/taxonomy.ts` y `src/lib/keywords.ts`. | 2026-10-08 |
 | Diseño del perfil `/profile/[username]` | Especificación completa en `docs/design/wireframes_profile.md` (edición inline, foto de perfil PNG/JPG ≤ 5 MB, bio, cambio de contraseña, correo oculto en perfil ajeno, publicaciones en cascada vertical). Revisado por `security-architect` (2026-10-08): 6 hallazgos (PR-1..PR-8) resueltos en el spec o pospuestos a backend en la nueva §2.9 (checklist pendiente). `wireframes.md` §3.3 pasa a puntero. Extensión prevista de `User` con `bio`/`avatarUrl` y `UserRepository.update`. | 2026-10-08 |
 | Diseño del panel de administración `/admin` | Especificación completa en `docs/design/wireframes_admin.md` (gestión de usuarios + asignación de rol, moderación `publicado ⇄ oculto`, **rol `admin` inmutable**, sin correo en la tabla, contrato de seguridad §2.9). Cierra el **desvío de pipeline** (la vista se implementó el 2026-10-08 sin spec). `wireframes.md` §3.4 pasa a puntero. Deuda documentada: `admin-view.tsx` lee `mockUsers`/`mockPosts` directos → `AdminRepository` pospuesto a la integración con la API. Revisado por `security-architect` (2026-10-09, joya P0 acceso): 3 requisitos de backend + 5 observaciones; ver registro de cambios. | 2026-10-09 |
+| **Pivot Fase 1 — eliminación del dominio posts/feed/landing** (commit `9989b02`) | Borrado de web/api/shared: feed, posts, `@modal/posts`, `components/feed`, landing editorial, `post-form`, `delete-post-modal`, `admin-post-row/posts-section`, `data/posts`, `lib/{visibility,filters,taxonomy,keywords}`, `validation/post`, `post-repository`, endpoints/posts de la API (`posts.routes`, `application/posts`, `set-post-visibility`, `in-memory-post-repository`), taxonomía/tipos/esquemas de posts en `@redfacyt/shared`. Placeholders mínimos `/` y `/dashboard` para mantener rutas vivas. Navbar/BottomNav sin enlaces muertos. Tests: web 288, api 127, shared 37 (antes 0). | 2026-10-17 |
+| **Pivot Fase 1 — roles y redirects** (commit `c459c16`) | `estudiante/profesor/admin` → **`coordinador`/`aprobador`/`admin_sistema`** en `@redfacyt/shared` (tipos + 3 enums Zod), `auth.config.ts` (`defaultValue: "coordinador"`: el registro público solo crea coordinadores), enforcement `requireRole("admin_sistema")`, `canChangeRole` (admin_sistema inmutable). `AuthorOption`→`UserOption`, `listAuthors`→`listByRole(role)`, endpoint `GET /users/authors`→`GET /users/coordinadores`, `promoteToAdmin`→`promoteToRole`. Destino post-login `/feed`→`/dashboard` (login, registro, AuthGuard, AdminView). Fixtures y tests de ambas apps adaptados. | 2026-10-17 |
+| **Pivot Fase 1 — documentación** (commit 3) | `docs/archive/` con `Proyecto1_Junio2026.md`, `implementation_base_v1.md` y `posts-integration-report.md`; docs del pivot a `docs/` (`pivot-project.md`, enunciado); nuevo `implementation_base.md` (alcance control de proyectos); `frontend-structure.md` (refactor aprobado) y `api-structure.md` adaptados; `board.json`, `AGENTS.md`, `OBJECTIVE.md`, `README.md` y design docs con nota de rediseño pendiente. | 2026-10-17 |
 
 ## En progreso
 
 | Ítem | Nota |
 | --- | --- |
-| Fase Frontend (datos estáticos) | Completada — todas las vistas protegidas del mapa de navegación implementadas y probadas. |
-| Implementación de perfil de usuario | Se implementaron las acciones y validaciones necesarias para la edición de perfil, cambio de contraseña y subida de avatar, integradas con los repositorios estáticos. |
+| **Pivot a Sistema de Control de Proyectos y Recursos** | Fase 1 (limpieza y preparación) ✅ completada. Fase 2 (diseño estilo Apple: brief + wireframes dashboard/proyectos/inventario/equipos/solicitudes/prorrateo/bitácora/reportes/auditoría) **pendiente de `designer`**; revisión de `security-architect` del nuevo modelo de amenaza. |
 
 ## Pendiente
 
 | Ítem | Depende de | Nota |
 | --- | --- | --- |
-| Ajustar umbrales/exclusiones `vitest.config.mts` + `typecheck` en Husky | pantallas + tests | p. ej. excluir `ui/**`/`app/**`, `lib/`/`data/` ≥ 90% |
-| Backend PostgreSQL + auth persistente | endpoints API en memoria | Adaptadores `infrastructure/repositories/postgres/` (mismo contrato), migraciones, `DATABASE_URL` requerida en prod; migrar sesiones en memoria a BD |
-| Integración frontend ↔ API | endpoints API | Sustituir repositorios estáticos (`post-repository.static.ts`, `auth-gateway.static.ts`) por consumo de la API + doble envío CSRF (obtener cookie vía GET antes de mutar) |
-| Requisito operativo reverse proxy | despliegue | Proxy debe sobrescribir `X-Forwarded-For` para que la clave de rate limit por IP sea no forjable (`rate-limit.ts`) |
-| Prueba ofensiva (`red-team`) | auth+endpoints | Pentesting: inmutabilidad del rol `admin` (toda salida de `admin` debe fallar), moderar/postear borradores ajenos, carrera de username (TOCTOU in-memory), fuerza bruta (429). Card Trello #26 |
-| Corrección de la implementación `/admin` (API) | `wireframes_admin.md` §2.9 | Implementar en la API los 3 requisitos bloqueantes del review: (F-01) **rechazar toda transición que salga de `admin`** en `PATCH /admin/users/:id/role` y reescribir el test de auto-democión (`admin.routes.test.ts:81-108`); (F-03) rechazar moderar un `borrador` ajeno; (D5) auditoría de cambios de rol en logs. Actualizar R16 (de "riesgo asumido" a control). Cierra card #13. |
-| Persistencia + integración frontend ↔ API | esquema DB (#11) | Card paraguas #27: adaptadores postgres, migrar sesiones a BD, sustituir repos estáticos por API, reverse proxy `X-Forwarded-For` |
+| Fase 2 — Diseño del nuevo sistema | pivot Fase 1 ✅ | Nuevo `brief.md` estilo Apple, wireframes del nuevo dominio (`docs/pivot-project.md` §5), review de `security-architect`. Los wireframes del dominio posts quedan obsoletos. |
+| Fase 3 — Dominio compartido y API | Fase 2 | Tipos/schemas en shared, entidades y use cases (proyectos, inventario, equipos, solicitudes, overhead, audit), máquina de estados de aprobación, algoritmo de prorrateo (dominio puro + TDD), rutas con validación Zod. |
+| Fase 4 — Frontend del nuevo dominio | Fase 3 | Tokens estilo Apple (`globals.css`), dashboard con KPIs, módulos completos, `/admin` ampliado a catálogos. |
+| Fase 5 — PostgreSQL e integración | Fase 4 | DDL + seeders, adaptadores `postgres/`, sustitución de repos estáticos por API, reverse proxy con `X-Forwarded-For`. |
+| Fase 6 — Documentación, testing y despliegue | Fase 5 | README, `prompts.md` (requisito del enunciado), evidencia en `docs/tests/`, despliegue. |
+| Backend PostgreSQL + auth persistente | Fase 5 | Migrar sesiones en memoria a BD (adapters Better Auth). |
+| Prueba ofensiva (`red-team`) | auth+endpoints | Pentesting: inmutabilidad del rol `admin_sistema`, fuerza bruta (429), carrera de username. |
+| Auditoría de cambios de rol en logs (D5) | Fase 3 | `actorId, targetUserId, roleBefore, roleAfter, timestamp, requestId`, sin PII. |
 
 ## Estado de tests
 
 | Suite | Resultado | Cobertura |
 | --- | --- | --- |
-| Smoke de rutas (cobertura total de 10 rutas) | 10/10 pasan | — |
-| Dominio del feed + taxonomía (`visibility` + `filters` + `taxonomy` + contract) | 74/74 pasan | 100% |
-| Componentes UI y Vistas web (`apps/web`, 31 archivos, 275 tests) | 275/275 pasan | ≥ 80% global |
-| API `apps/api` (16 archivos, 179 tests) | 179/179 pasan | 94.21% stmts, 81.93% branches, 95.1% funcs |
-| Monorepo Total (47 archivos de test) | 454/454 pasan | 100% PASS |
+| `@redfacyt/shared` (3 archivos, 37 tests de esquemas) | 37/37 pasan | 100% |
+| API `apps/api` (14 archivos, 127 tests) | 127/127 pasan | 94.53% stmts, 80.25% branches, 95.1% funcs |
+| Web `apps/web` (36 archivos, 288 tests) | 288/288 pasan | 94.3% stmts, 86.47% branches, 95.45% funcs |
+| **Monorepo Total (53 archivos de test)** | **452/452 pasan** | gate ≥ 80% PASS en las 3 workspaces |
 
 ## Registro de cambios (últimos)
+
+- **2026-10-17 — Pivot Fase 1: Sistema de Control de Proyectos y Recursos (limpieza, roles y docs)**: se ejecutó la Fase 1 del pivot aprobado (`docs/pivot-project.md`) en 3 commits sobre `features/pivot`: (1) `9989b02 refactor: remove posts/feed/landing domain…` — eliminación completa del dominio de publicaciones en web/api/shared (ver tabla "Implementado"), con placeholders `/` y `/dashboard`, adaptación de Navbar/BottomNav y nuevos tests (esquemas de `@redfacyt/shared`: 37 tests que cerraban un gate roto con 0 tests); (2) `c459c16 refactor: replace academic roles…` — roles `admin_sistema`/`coordinador`/`aprobador` en todo el monorepo, registro público crea `coordinador`, endpoint `/users/coordinadores` + `listByRole`, `UserOption`, redirects post-login a `/dashboard`; (3) documentación — `docs/archive/` (spec Red FaCyT), nuevo `implementation_base.md`, `frontend-structure.md` (refactor aprobado) y `api-structure.md` adaptados, tablero Kanban renovado con las 6 fases. Gate: `pnpm -r lint` limpio y 452/452 tests PASS con cobertura ≥ 80% en shared/web/api. **Eliminado también** `src/data/session.ts` (mock sin consumidores). UI y wireframes del nuevo dominio quedan para la Fase 2.
 
 - **2026-10-09 — Corrección de la implementación `/admin` (web)**: se refactorizó la vista monolítica en componentes (AdminUsersSection, AdminPostsSection) siguiendo el TDD. Se incorporaron funciones de dominio (listModerablePosts, canChangeRole) excluyendo 'borradores' de la lista de moderación. Se implementó un diálogo de confirmación `ConfirmRoleDialog` y se deshabilitó el selector de cambio de rol para administradores. La vista ya no pinta correos. Tests 100% PASS.
 

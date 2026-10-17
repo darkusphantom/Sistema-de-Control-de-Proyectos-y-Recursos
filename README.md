@@ -1,8 +1,10 @@
-# Red FaCyT
+# Sistema de Control de Proyectos y Recursos — FACYT
 
-Aplicación web para publicaciones académicas y vida universitaria de la **Facultad Experimental de Ciencias y Tecnología (FaCyT)**. Red institucional donde la comunidad universitaria publica, consulta y organiza información académica, estudiantil e institucional.
+Aplicación web para el **control de proyectos científicos y sus recursos** (inventario, equipos, despachos, solicitudes de gasto, prorrateo, reportes y auditoría) de la **Facultad Experimental de Ciencias y Tecnología (FACYT)**.
 
-> Documento de referencia del proyecto: [`docs/Proyecto1_Junio2026.md`](docs/Proyecto1_Junio2026.md)
+> **Estado**: pivot en curso (Fase 1 completada: limpieza del dominio anterior, roles y documentación). Fases pendientes en [`docs/pivot-project.md`](docs/pivot-project.md) §9.
+>
+> Documentos de referencia: enunciado del pivot [`docs/PIVOT-enunciado-control-de-proyectos-quimicos.md`](docs/PIVOT-enunciado-control-de-proyectos-quimicos.md) · plan [`docs/pivot-project.md`](docs/pivot-project.md) · alcance [`docs/implementation/implementation_base.md`](docs/implementation/implementation_base.md). La spec del proyecto anterior (Red FaCyT) está archivada en [`docs/archive/`](docs/archive/).
 
 ## Tecnologías
 
@@ -90,10 +92,8 @@ apps/
     └── src/__tests__/       #   Tests de rutas
 packages/
 ├── shared/                  # Código común (@redfacyt/shared)
-│   ├── src/types/           #   Tipos TypeScript compartidos
-│   ├── src/schemas/         #   Esquemas Zod compartidos
-│   ├── src/taxonomy/        #   Enums y constantes taxonómicas
-│   └── src/domain/          #   Lógica de dominio pura compartida
+│   ├── src/types/           #   Tipos TypeScript compartidos (user, session, pagination)
+│   └── src/schemas/         #   Esquemas Zod compartidos (auth, user, profile)
 └── tsconfig/                # Configuración base de TypeScript
 ```
 
@@ -103,7 +103,7 @@ La API vive en `apps/api` (workspace `@red-facyt/api`), implementada con **Hono 
 
 - **Scaffold**: patrón `createApp` (puro y testeable), entorno validado con zod (fail-fast), middleware de seguridad (CORS whitelist, security headers, body limit, error handler sin fuga de stack, 404 JSON, `x-request-id`) y `GET /api/v1/health`.
 - **Auth (Better Auth en memoria)**: registro, login (por `username`), sesión y logout bajo `/api/v1/auth/*`. Sesiones de BD en memoria (revocables), cookies `httpOnly`/`SameSite=Lax`/`Secure`(prod), hashing **Scrypt**, CSRF de doble envío (`facy.csrf_token`) y rate limiting por IP/usuario (`429`).
-- **Endpoints `/api/v1/*`**: feed `GET /posts` (filtros + paginación, visibilidad session-aware), CRUD de publicaciones con enforcement propietario/admin, perfiles (`/users/authors`, `/users/:username`) con email redactado, y admin (`/admin/users/:id/role`, `/admin/posts/:id/visibility`). Validación **zod** por ruta y rol **fresco por petición**.
+- **Endpoints `/api/v1/*`**: usuarios (`/users/coordinadores`, `/users/:username` con email redactado) y admin (`/admin/users/:id/role`, solo `admin_sistema`). Validación **zod** por ruta y rol **fresco por petición**. Los endpoints del nuevo dominio (proyectos, inventario, equipos, solicitudes, prorrateo, reportes, auditoría) llegarán con la Fase 3 del pivot.
 - **OpenAPI**: `GET /api/v1/openapi.json` y `/docs` (bloqueados en producción).
 
 En memoria (MVP): los datos viven en `src/infrastructure/repositories/in-memory/` con contrato hexagonal (`src/domain/`) migrable a PostgreSQL sin rework.
@@ -151,9 +151,10 @@ Documentación de la API: [`docs/architecture/api-structure.md`](docs/architectu
 
 ## Documentación
 
-- [`docs/Proyecto1_Junio2026.md`](docs/Proyecto1_Junio2026.md) — enunciado del proyecto
-- [`docs/design/wireframes.md`](docs/design/wireframes.md) — mapa de navegación y esquemas
-- [`docs/implementation/implementation_base.md`](docs/implementation/implementation_base.md) — requisitos base de la estructura principal
+- [`docs/PIVOT-enunciado-control-de-proyectos-quimicos.md`](docs/PIVOT-enunciado-control-de-proyectos-quimicos.md) — enunciado del proyecto (tras el pivot)
+- [`docs/pivot-project.md`](docs/pivot-project.md) — plan de pivot: diagnóstico, mapa de rutas, roles y fases
+- [`docs/design/wireframes.md`](docs/design/wireframes.md) — mapa de navegación (wireframes del nuevo dominio pendientes, Fase 2)
+- [`docs/implementation/implementation_base.md`](docs/implementation/implementation_base.md) — alcance del MVP (control de proyectos)
 - [`docs/architecture/api-structure.md`](docs/architecture/api-structure.md) — arquitectura de la API (`apps/api`)
 - [`docs/security/threat-model-api.md`](docs/security/threat-model-api.md) — modelo de amenaza de la API
 - [`docs/tests/api-scaffold-test-report.md`](docs/tests/api-scaffold-test-report.md) — evidencia de pruebas del scaffold de la API

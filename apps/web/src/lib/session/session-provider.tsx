@@ -41,10 +41,10 @@ export type SessionProviderProps = {
  * Resolves the active session from `localStorage` and gates authenticated
  * routes in the `(main)` group.
  *
- * Comportamiento (`docs/design/wireframes_feed.md` §2.4):
+ * Comportamiento:
  * - Mientras resuelve (`status === "loading"`): renderiza un contenedor
- *   `aria-busy` en vez de `children` para evitar el flash del feed antes del
- *   redirect.
+ *   `aria-busy` en vez de `children` para evitar el flash del contenido antes
+ *   del redirect.
  * - `status === "anonymous"`: llama `router.replace("/login")` para que
  *   `/dashboard` no aparezca en el historial del navegador.
  * - `status === "authenticated"`: renderiza `children` con normalidad.

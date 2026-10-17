@@ -1,4 +1,5 @@
 # Feed `/feed` — Red FaCyT
+> **Pivot 2026-10-17**: esta pantalla fue **eliminada** con el dominio anterior (commit `9989b02`); el documento se conserva como referencia histórica. El nuevo dominio tendrá sus propios wireframes (Fase 2, `docs/pivot-project.md` §5).
 
 Especificación de diseño de la pantalla principal de `(main)`: el feed de
 publicaciones y el shell autenticado que la rodea. El `developer` implementa este

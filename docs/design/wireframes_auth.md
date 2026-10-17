@@ -1,4 +1,5 @@
 # Wireframes — Autenticación `/login` y `/register` (Red FaCyT)
+> **Pivot 2026-10-17**: la identidad visual se rediseña en la Fase 2 (estilo Apple, `docs/pivot-project.md` §8); los tokens y el copy de este documento quedan **pendientes de rediseño**, mientras que estructura, estados y accesibilidad siguen vigentes.
 
 Esquemas de las dos pantallas públicas del route group `(auth)`. El mapa de
 navegación y los esquemas de las demás pantallas viven en

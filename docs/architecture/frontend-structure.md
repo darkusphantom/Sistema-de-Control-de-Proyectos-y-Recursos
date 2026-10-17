@@ -1,16 +1,16 @@
-# Arquitectura de Frontend — Red FaCyT
+# Arquitectura de Frontend — Red FaCyT (Sistema de Control de Proyectos)
 
-Guía de implementación de la fase frontend (datos estáticos). Define la **estructura objetivo** del frontend, de modo que sirva de hoja de ruta para migrar a backend sin rework.
+Guía de implementación del frontend. Define la **estructura objetivo** del frontend tras el pivot a Control de Proyectos y Recursos ([`docs/pivot-project.md`](../pivot-project.md)), de modo que sirva de hoja de ruta para migrar a backend sin rework.
 
 > **Este documento es INMUTABLE una vez implementado:** describe la arquitectura objetivo y las convenciones. El estado real de implementación vive en [`progress.md`](progress.md) (dinámico) y se actualiza tras cada cambio. No edites este archivo como parte de una tarea de desarrollo; solo con aprobación explícita de un refactor de arquitectura.
+>
+> **Historial**: la versión pre-pivot (dominio posts/feed) está descrita en el historial de git; los requisitos del alcance anterior viven en [`docs/archive/implementation_base_v1.md`](../archive/implementation_base_v1.md).
 
 Fuentes de referencia:
 
-- [`docs/design/brief.md`](../design/brief.md) — identidad editorial, paleta y contenido.
-- [`docs/design/components.md`](../design/components.md) — design tokens y inventario de componentes.
-- [`docs/design/wireframes.md`](../design/wireframes.md) — mapa de navegación y esquemas por pantalla.
-- [`docs/design/accessibility.md`](../design/accessibility.md) — WCAG 2.2 AA por pantalla.
-- [`docs/implementation/implementation_base.md`](../implementation/implementation_base.md) — requisitos del MVP.
+- [`docs/implementation/implementation_base.md`](../implementation/implementation_base.md) — requisitos del MVP (control de proyectos).
+- [`docs/pivot-project.md`](../pivot-project.md) — diagnóstico del pivot, mapa de rutas y roles.
+- [`docs/design/`](../design/) — brief, componentes y wireframes (**rediseño estilo Apple pendiente en Fase 2**; los wireframes del dominio posts quedan obsoletos y se reemplazarán).
 
 ## 1. Stack y decisiones
 
@@ -19,16 +19,16 @@ Fuentes de referencia:
 | Framework | Next.js 16 (App Router) | Server Components por defecto |
 | Lenguaje | TypeScript 5 | Código en inglés, UI en español |
 | Estilos | Tailwind CSS 4 + CSS variables | Tokens semánticos, sin `hex` suelto |
-| Componentes UI | shadcn/ui *(pendiente de instalar)* | Prima radix accesible |
-| Temas | `next-themes` *(pendiente de instalar)* | Clase `.dark`, persistencia en `localStorage` |
-| Tests | Vitest 5 + Testing Library | Umbral de cobertura v8 ≥ 80% |
-| Calidad | Husky pre-commit | `pnpm lint` + `pnpm test:coverage` |
-| API (futuro) | Server Actions | No implementar hasta la fase backend |
-| Datos | Estáticos en `src/data/` | Con patrón repositorio para migrar sin rework |
+| Componentes UI | primitivos propios (`ui/`) | shadcn/ui descartado; accesibilidad a cargo del equipo |
+| Temas | store propio `theme.ts` | Clase `.dark`, persistencia en `localStorage` |
+| Tests | Vitest 5 + Testing Library | Umbral de cobertura ≥ 80% |
+| Calidad | Husky pre-commit | `pnpm -r lint` + `pnpm -r test:coverage` |
+| API | Hono 4 (`apps/api`) | Integración por sustituir repositorios estáticos |
+| Datos | Estáticos en `src/data/` + `auth-gateway.static.ts` | Con patrón repositorio para migrar sin rework |
 
-## 2. Estructura de directorios objetivo
+## 2. Estructura de directorios
 
-Estructura **colocated**: cada test vive junto al código que verifica; `src/test/` centraliza solo helpers de test (factories, fixtures, render, adaptadores in-memory) y `__tests__/` queda reservado para los smoke tests de rutas. Los tests del espejo de carpetas no están duplicados: es una visual del código fuente, y cada `*.test.*` se crea junto a su módulo.
+Estructura **colocated**: cada test vive junto al código que verifica; `src/test/` centraliza solo helpers de test y `__tests__/` queda reservado para los smoke tests de rutas.
 
 ```
 apps/web/src/
@@ -36,142 +36,95 @@ apps/web/src/
 │   ├── layout.tsx                ✓ Layout raíz (metadata, ThemeProvider, .dark)
 │   ├── globals.css               ✓ Tokens claro/oscuro + Tailwind
 │   ├── (landing)/                → Público: /
-│   │   └── page.tsx              ✓ placeholder → Bienvenida (hero editorial)
+│   │   └── page.tsx              ✓ placeholder (bienvenida del sistema — Fase 2)
 │   ├── (auth)/                   → Público
-│   │   ├── login/page.tsx        ✓ placeholder → LoginForm
-│   │   └── register/page.tsx     ✓ placeholder → RegisterForm
+│   │   ├── login/page.tsx        ✓ → LoginForm
+│   │   └── register/page.tsx     ✓ → RegisterForm
 │   └── (main)/                   → Autenticado
-│       ├── layout.tsx            → shell autenticado (Navbar + BottomNav + Footer)
-│       ├── feed/page.tsx         ✓ placeholder → Feed
-│       ├── posts/
-│       │   ├── new/page.tsx      → crear publicación (PostForm)
-│       │   └── [id]/page.tsx     → detalle / edición (/posts/[id]/edit)
+│       ├── layout.tsx            ✓ shell (Navbar + BottomNav + Footer)
+│       ├── @modal/default.tsx    ✓ slot paralelo (futuros modales)
+│       ├── dashboard/page.tsx    ✓ placeholder (KPIs — Fase 2)
 │       ├── profile/
-│       │   └── [username]/page.tsx  ✓ placeholder → perfil
-│       └── admin/page.tsx        → roles/permisos (simulada, solo admin)
+│       │   ├── [username]/page.tsx  ✓ perfil de usuario
+│       │   └── actions.ts        ✓ server actions de perfil
+│       └── admin/page.tsx        ✓ gestión de usuarios/roles (solo admin_sistema)
 │
-├── components/                   → UI DE DOMINIO — cobertura global
-│   ├── ui/                       → shadcn/ui primitivos (Button, Card, Dialog, …)
-│   ├── layout/                   → estructura de navegación
-│   │   ├── navbar.tsx            + navbar.test.tsx          (colocated)
-│   │   ├── bottom-nav.tsx
-│   │   ├── sidebar.tsx
-│   │   ├── theme-toggle.tsx      + theme-toggle.test.tsx    (aria-pressed)
-│   │   └── footer.tsx
-│   ├── feed/                     → tarjetas y filtros del feed
-│   │   ├── post-card.tsx         + post-card.test.tsx       (badges/visibilidad/acciones)
-│   │   ├── post-detail.tsx       + post-detail.test.tsx
-│   │   └── filter-bar.tsx        + filter-bar.test.tsx      (filtros combinados + contador)
-│   ├── forms/
-│   │   ├── login-form.tsx        + login-form.test.tsx      (validación inline + resumen)
-│   │   ├── register-form.tsx     + register-form.test.tsx
-│   │   └── post-form.tsx         + post-form.test.tsx
-│   └── shared/                   → reutilizables sin dominio
-│       ├── empty-state.tsx       + empty-state.test.tsx
-│       └── pagination.tsx
+├── components/                   → UI DE DOMINIO
+│   ├── ui/                       → primitivos (Badge, SelectField, Dialog, Avatar, …)
+│   ├── layout/                   → navbar, bottom-nav, theme-toggle, footer
+│   ├── auth/                     → auth-guard + login/register forms (en forms/)
+│   ├── profile/                  → user-profile-view, profile-form, password-form, avatar-uploader
+│   ├── admin/                    → admin-view, admin-users-section, admin-user-row, confirm-role-dialog
+│   └── shared/                   → empty-state (reutilizable sin dominio)
 │
 ├── lib/                          → LÓGICA PURA Y RE-EXPORTACIONES
-│   ├── format.ts                 ✓ + format.test.ts   ✓ (colocated)
-│   ├── types.ts                  → Re-exporta Post, User, Session, PostFilters desde @redfacyt/shared
-│   ├── visibility.ts             → Re-exporta canViewPost desde @redfacyt/shared
-│   ├── filters.ts                → Re-exporta applyFilters desde @redfacyt/shared
-│   └── repositories/             → CONTRATO hexagonal (interfaz ≠ implementación)
-│       ├── post-repository.ts            → interfaz PostRepository
-│       ├── post-repository.static.ts     → impl. estática sobre src/data
-│       ├── post-repository.contract.test.ts → vs in-memory (hoy) y Supabase (CI)
-│       ├── user-repository.ts            → interfaz
-│       └── user-repository.static.ts
+│   ├── format.ts, cn.ts          ✓ utilidades (colocated tests)
+│   ├── types.ts                  → re-exporta User, Session, UserOption, UserRole desde @redfacyt/shared
+│   ├── admin/moderation.ts       ✓ canChangeRole (rol admin_sistema inmutable)
+│   ├── auth/                     → AuthGateway (interfaz) + StaticAuthGateway
+│   ├── session/session-provider.tsx → estados loading/authenticated/anonymous
+│   ├── validation/               → validación pura de formularios (profile)
+│   └── repositories/             → CONTRATO hexagonal
+│       ├── user-repository.ts            → interfaz UserRepository
+│       ├── user-repository.static.ts     → impl. estática sobre src/data
+│       └── user-repository.contract.test.ts
 │
-├── data/                         → DATOS ESTÁTICOS mock (misma forma que el modelo futuro)
-│   ├── posts.ts                  + posts.test.ts    (integridad de fixtures)
-│   ├── users.ts                  + users.test.ts
-│   └── session.ts                → usuario de la sesión ficticia
+├── data/                         → DATOS ESTÁTICOS mock
+│   └── users.ts                  ✓ fixtures con roles admin_sistema/aprobador/coordinador
 │
-├── test/                         → HELPERS de test (NO son tests — no cuentan cobertura)
-│   ├── factories.ts              → makePost(), makeUser(), makeSession()
-│   ├── fixtures.ts               → datasets tipados (feed, escenario de filtros)
-│   ├── render.tsx                → renderWithProviders(ui, { theme, repos })
-│   └── in-memory-repositories.ts → adaptadores in-memory de las interfaces del contrato
+├── test/                         → HELPERS de test (factories, render)
 │
-└── __tests__/                    → SOLO SMOKE de rutas (montan sin error)
-    └── routes.smoke.test.tsx     ✓ existe → se reescribe con vi.mock al tener pantallas
+└── __tests__/                    → SOLO SMOKE de rutas
+    └── routes.smoke.test.tsx     ✓
 ```
 
-**Leyenda:** `✓` = ya existe hoy · `+ archivo.test.*` = test colocated que se crea junto al código · sin marca = objetivo por implementar.
+**Convenciones** (sin cambios respecto a la versión pre-pivot):
 
-### Convenciones
-
-- **Código en inglés**: nombres de archivos, identificadores, strings de interfaz en `apps/web/src/`.
+- **Código en inglés**: nombres de archivos, identificadores y strings internos en `apps/web/src/`.
 - **UI en español**: todo texto visible al usuario va en español.
 - **JSDoc obligatorio** en toda función/componente público.
-- **Server Components por defecto**; `'use client'` solo donde haya interacción (forms, ThemeToggle, filtros).
-- **Colocation de tests**: `module.ts` → `module.test.ts` en la misma carpeta. Solo `__tests__/` y `src/test/` escapan a esta regla (smoke de rutas y helpers, respectivamente).
-- **Patrón repositorio**: las vistas consumen *interfaces* (`PostRepository`); la implementación estática lee `src/data/`. Al llegar el backend solo cambia la implementación, no las pantallas.
+- **Server Components por defecto**; `'use client'` solo donde haya interacción.
+- **Colocation de tests**: `module.ts` → `module.test.ts` en la misma carpeta.
+- **Patrón repositorio**: las vistas consumen interfaces; al llegar el backend solo cambia la implementación.
 
-## 3. Mapa de rutas
+## 3. Mapa de rutas (transitorio — Fase 1 del pivot)
 
 | Ruta | Grupo | Acceso | Pantalla |
 | --- | --- | --- | --- |
-| `/` | `(landing)` | público | Bienvenida — hero editorial institucional |
+| `/` | `(landing)` | público | Placeholder de bienvenida (rediseño Fase 2) |
 | `/login` | `(auth)` | público | Iniciar sesión |
-| `/register` | `(auth)` | público | Registro (nombre, apellido, correo, contraseña) — sin selector de rol; el rol se asigna en `/admin` |
-| `/feed` | `(main)` | autenticado | Dashboard — feed de publicaciones con filtros |
-| `/posts/new` | `(main)` | autenticado | Crear publicación |
-| `/posts/[id]` | `(main)` | autenticado | Detalle completo + edición (`/posts/[id]/edit`) |
-| `/profile/[username]` | `(main)` | autenticado | Perfil + publicaciones del usuario |
-| `/admin` | `(main)` | solo `admin` | Gestión de roles/permisos (simulada) |
+| `/register` | `(auth)` | público | Registro (crea `coordinador` por defecto) |
+| `/dashboard` | `(main)` | autenticado | Placeholder del dashboard ejecutivo (Fase 2) |
+| `/profile/[username]` | `(main)` | autenticado | Perfil de usuario (conservado del alcance anterior) |
+| `/admin` | `(main)` | solo `admin_sistema` | Gestión de usuarios y roles |
 
-Guardas de acceso (simuladas en la fase estática, reales en backend):
-- `(landing)` y `(auth)`: público.
-- `(main)`: sin sesión → `/login`.
-- `/admin`: sin rol `admin` → `/feed`.
+Guardas:
+- `(main)`: sin sesión → `/login` (SessionProvider + layout).
+- `/admin`: rol ≠ `admin_sistema` → `/dashboard` (server-side en backend; cliente en fase estática).
+
+El mapa completo objetivo (proyectos, inventario, equipos, solicitudes, prorrateo, reportes, auditoría) está en [`docs/pivot-project.md`](../pivot-project.md) §6 y se implementa en las Fases 2–4.
 
 Recuperación de contraseña: **fuera del MVP**.
 
 ## 4. Estado del repositorio
 
-El estado real de implementación **no vive en este archivo**. Consulta [`progress.md`](progress.md): contiene las secciones Implementado / En progreso / Pendiente, el estado de tests y el registro de cambios, y se actualiza tras cada implementación (regla de la skill `project-context`).
+El estado real de implementación **no vive en este archivo**. Consulta [`progress.md`](progress.md).
 
 ## 5. Theming (claro/oscuro)
 
-- Tokens como CSS variables en `globals.css`, con valores light en `:root` y dark bajo `.dark` (ver tabla en `docs/design/brief.md`).
-- `--primary` (`#1E3A5F` light / `#7FA8E8` dark) para masthead/marca; `--accent` (`#D97706` / `#F59E0B`, ámbar) como único color accionable de superficies (CTA, estado activo) y del anillo de foco; `--accent-teal` (`#0369A1` / `#38BDF8`) para enlaces; `--accent-foreground` (`#0B1220` en ambos temas) para el texto sobre `--accent`.
-- `next-themes` con `ThemeProvider` en el layout raíz y `ThemeToggle` en la navbar.
-- Aplicar `.dark` en `<html>` antes del primer pinto para evitar flash de fondo (ver `docs/design/accessibility.md` §5).
+- Tokens como CSS variables en `globals.css`, con valores light en `:root` y dark bajo `.dark`.
 - Componentes usan **solo tokens semánticos**; prohibido `hex` suelto.
+- `ThemeProvider` propio en el layout raíz + `ThemeToggle` en la navbar; `.dark` aplicado antes del primer pintado.
+- **Pendiente Fase 2**: migración de tokens al estilo Apple (azul `#0071E3`, fondos blancos/grises, radios grandes) según `docs/pivot-project.md` §8. La estructura de variables CSS se conserva.
 
-## 6. Capa de datos estáticos y visibilidad
+## 6. Capa de datos estática
 
-- `src/data/` expone mock de usuarios y publicaciones con la misma forma que el modelo futuro.
-- `src/lib/repositories/` define interfaces (`PostRepository.findAll`, `findById`, `save`, …) e implementaciones estáticas sobre `src/data/`.
-- Visibilidad simulada (regla del feed, `docs/design/components.md` §4):
-
-  ```
-  visible = visibility === 'publicado'
-         OR (author_id === sessionUser.id)
-  ```
-
-  `borrador`: badge gris, solo el autor. `oculto` (admin): nadie excepto autor y admin. La sesión ficticia vive en `src/data/session.ts`.
-- Orden por defecto del feed: **fecha DESC** (más reciente primero).
-- Filtros combinables sobre búsqueda por palabra clave (categoría, tipo, autor, estado, rango de fechas) — ver justificación en `docs/design/wireframes.md` §3.
+- `src/data/` expone mocks con la misma forma que el modelo futuro (`users.ts`; el resto de entidades llega con las Fases 3–4).
+- `src/lib/repositories/` define interfaces e implementaciones estáticas; la sesión ficticia la resuelve `StaticAuthGateway` (antes `data/session.ts`, eliminado por sin consumidores).
+- `GET /users/coordinadores` (API) sustituye al antiguo listado de autores: `UserRepository.listByRole(role)` en la API y el contrato web.
 
 ## 7. Testeo
 
-- Enfoque: tests por pantalla y por componente con Vitest + Testing Library (jsdom).
-- Umbral de cobertura **≥ 80%** (líneas, funciones, ramas, sentencias) configurado en `vitest.config.mts` y exigido por Husky en cada commit.
-- Generar primero los tests (TDD) para la lógica de filtrado/visibilidad (repositorios estáticos) y para el render de cada pantalla.
-- Smoke tests existentes: garantizan que el App Router monta sin errores.
-
-## 8. Hoja de ruta de implementación
-
-Orden sugerido (alineado con la tarjeta «Fase Frontend» de Trello):
-
-1. Instalar `shadcn/ui` (init + `components.json` + alias `@/components`) y `next-themes`.
-2. Tokens claro/oscuro en `globals.css`; `ThemeProvider` + `ThemeToggle`.
-3. Crear el esqueleto base: carpetas `src/components/{layout,feed,forms,shared,ui}`, `src/data`, `src/test` y `src/lib/repositories`.
-4. Crear el núcleo de lógica (TDD): `src/lib/types.ts`, `src/lib/visibility.ts`, `src/lib/filters.ts`, `src/data/*` y `src/lib/repositories/` (contract tests primero) + `src/test/` (factories, fixtures, render, in-memory).
-5. Layout shell: layouts de `(landing)`, `(auth)` y `(main)` + `Navbar`/`BottomNav`/`Footer` y sus tests colocated.
-6. Pantallas en orden: bienvenida → login/registro → feed (`PostCard`/`FilterBar`) → crear/detalle/edición → perfil → admin, cada una con su `*.test.tsx` colocated.
-7. Reescribir `src/__tests__/routes.smoke.test.tsx` con `vi.mock` (repositorios, `next-themes`, `next/navigation`).
-8. Ajustar umbrales y exclusions de cobertura en `vitest.config.mts` (p. ej. excluir `ui/**` y `app/**`, ramas 75% heavy-UI, `lib/`/`data/` al 90%) y añadir `typecheck` al hook Husky.
-9. Actualizar `docs/architecture/progress.md` al finalizar cada paso (estado real). Este archivo solo cambia por refactor de arquitectura aprobado.
+- Tests por pantalla y componente con Vitest + Testing Library (jsdom); colocated.
+- Umbral de cobertura **≥ 80%** en todas las métricas (`vitest.config.mts`), exigido por Husky.
+- Smoke tests de rutas en `__tests__/routes.smoke.test.tsx`.

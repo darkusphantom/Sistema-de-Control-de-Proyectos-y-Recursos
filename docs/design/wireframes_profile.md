@@ -1,4 +1,5 @@
 # Vista de perfil `/profile/[username]` — Red FaCyT
+> **Pivot 2026-10-17**: la identidad visual se rediseña en la Fase 2 (estilo Apple, `docs/pivot-project.md` §8); los tokens y el copy de este documento quedan **pendientes de rediseño**, mientras que estructura, estados y accesibilidad siguen vigentes.
 
 > [!NOTE]
 > Documento de fase de diseño. Fecha: 2026-10-08. Revisado por `security-architect` el 2026-10-08 (mejoras de seguridad aplicadas).

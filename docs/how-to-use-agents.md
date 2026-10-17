@@ -56,7 +56,7 @@ Pídele la tarea de diseño con contexto: audiencia, pantallas a cubrir y objeti
 - Si la brief está incompleta, pregunta antes de diseñar.
 
 ### Ejemplo de uso
-> Diséñame el flujo de inicio y registro de Red FaCyT para estudiantes de la Facultad Experimental de Ciencias y Tecnología. Genera brief, wireframes y componentes en `docs/design/`. Evita imitar redes sociales comerciales.
+> Diséñame el flujo de inicio y registro del Sistema de Control de Proyectos y Recursos para coordinadores de proyecto de la Facultad Experimental de Ciencias y Tecnología. Genera brief, wireframes y componentes en `docs/design/`. Evita imitar interfaces de gestión genéricas.
 
 ---
 
@@ -81,7 +81,7 @@ Desarrollador full-stack de Red FaCyT: frontend (Next.js/React) y backend (Serve
 - Si la tarea es de diseño, delega al agente `designer`; no la reinventes.
 
 ### Ejemplo de uso
-> Implementa la vista de feed según los entregables de `docs/design/`. Escribe primero los tests con Vitest, después la implementación en Next.js con Server Actions. Respeta JSDoc, patrones y el código en inglés.
+> Implementa la vista de dashboard según los entregables de `docs/design/`. Escribe primero los tests con Vitest, después la implementación en Next.js con Server Actions. Respeta JSDoc, patrones y el código en inglés.
 
 ---
 
@@ -107,7 +107,7 @@ Dale el contexto del cambio (archivos, rama o PR). Evaluará 8 dimensiones: corr
 - No reescribe el código completo salvo que se pida.
 
 ### Ejemplo de uso
-> Revisa la feature "crear publicación": archivos modificados en `src/features/posts`. Valora corrección, manejo de errores, rendimiento (N+1) y accesibilidad WCAG 2.2 AA. Emite hallazgos por severidad sin modificar nada.
+> Revisa la feature "crear proyecto": archivos modificados en `src/app/(main)/projects`. Valora corrección, manejo de errores, rendimiento (N+1) y accesibilidad WCAG 2.2 AA. Emite hallazgos por severidad sin modificar nada.
 
 ---
 
@@ -133,7 +133,7 @@ Pídele una auditoría enfocada (módulo, endpoints o base de datos). Ejecuta co
 - No modifica código. Respuestas directas, sin validación emocional ni frases de apoyo.
 
 ### Ejemplo de uso
-> Audita la seguridad del módulo de autenticación: sesiones, rate limiting, IDOR en edición/borrado y las policies RLS de las tablas de publicaciones. Reporta por severidad con el código refactorizado seguro.
+> Audita la seguridad del módulo de autenticación: sesiones, rate limiting, IDOR en la aprobación de solicitudes y las policies RLS de las tablas de proyectos y recursos. Reporta por severidad con el código refactorizado seguro.
 
 ---
 
@@ -158,7 +158,7 @@ Pídele cubrir un flujo o módulo concreto. Usa las skills `webapp-testing`, `fr
 - No modifica código de producción; solo tests y documentación de pruebas.
 
 ### Ejemplo de uso
-> Diseña y ejecuta las pruebas E2E del flujo de creación de publicaciones: registro → login → crear → publicar → editar. Incluye casos borde (campos vacíos, visibilidad privada) y deja la evidencia en `docs/tests/`.
+> Diseña y ejecuta las pruebas E2E del flujo de solicitudes de gasto: registro → login → crear solicitud → aprobar/rechazar → despachar. Incluye casos borde (campos vacíos, conflictos de reserva) y deja la evidencia en `docs/tests/`.
 
 ---
 
@@ -206,7 +206,7 @@ Product manager de Red FaCyT. Gestiona el tablero Kanban de **Trello** del proye
 - No usa `bash`, no edita archivos ni accede a otras MCP (Notion/Supabase).
 
 ### Ejemplo de uso
-> Crea la tarjeta "Implementar buscador del feed" en Pendiente con checklist (diseñar filtros, agregar búsqueda, tests), responsable developer, etiquetas Alta + feature. Luego muévela a En desarrollo y reporta el avance del tablero.
+> Crea la tarjeta "Implementar alertas de stock mínimo" en Pendiente con checklist (diseñar catálogo, definir umbrales, tests), responsable developer, etiquetas Alta + feature. Luego muévela a En desarrollo y reporta el avance del tablero.
 
 ---
 

@@ -1,5 +1,7 @@
 # Wireframes — Red FaCyT (Mapa de navegación y esquemas)
 
+> **Pivot 2026-10-17**: mapa **parcialmente obsoleto**: las pantallas de `/feed`, publicaciones y bienvenida editorial fueron eliminadas (commit `9989b02`). El mapa objetivo del nuevo dominio está en `docs/pivot-project.md` §6 y sus wireframes se diseñan en la Fase 2.
+
 Documento **maestro**: contiene el mapa de navegación, los esquemas de las
 pantallas autenticadas de `(main)` y las decisiones transversales. Los wireframes
 por área viven en archivos propios:

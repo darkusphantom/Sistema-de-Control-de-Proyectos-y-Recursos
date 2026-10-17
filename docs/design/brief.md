@@ -1,4 +1,5 @@
 # Brief de diseño — Red FaCyT (Estrategia Rediseñada: Bienvenida Mobile-First & Slider)
+> **Pivot 2026-10-17**: la identidad visual se rediseña en la Fase 2 (estilo Apple, `docs/pivot-project.md` §8); los tokens y el copy de este documento quedan **pendientes de rediseño**, mientras que estructura, estados y accesibilidad siguen vigentes.
 
 ## 1. Concepto e Identidad
 

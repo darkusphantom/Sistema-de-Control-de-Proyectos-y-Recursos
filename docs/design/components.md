@@ -1,4 +1,5 @@
 # Componentes y Tokens de Diseño — Red FaCyT (Especificación Slider)
+> **Pivot 2026-10-17**: la identidad visual se rediseña en la Fase 2 (estilo Apple, `docs/pivot-project.md` §8); los tokens y el copy de este documento quedan **pendientes de rediseño**, mientras que estructura, estados y accesibilidad siguen vigentes.
 
 Especificación de componentes de UI y tokens de diseño para la vista de bienvenida `/` (`(landing)`) basada en el **deslizante interactivo mobile-first**.
 

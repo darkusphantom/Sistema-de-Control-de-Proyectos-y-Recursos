@@ -2,7 +2,9 @@
 
 Guía de implementación del scaffold inicial de la API de Red FaCyT como aplicación separada del monorepo pnpm (`apps/api`). Define la **estructura objetivo** y las decisiones de stack para que el `developer` implemente el scaffold sin ambigüedad y para que la API crezca hacia Better Auth + PostgreSQL + repositorios hexagonales **sin rework**.
 
-> **Estado**: documento de diseño (fase de diseño, agente `security-architect`). El estado real de implementación vive en `docs/architecture/progress.md` (dinámico). Este documento NO es inmutable como `frontend-structure.md`, pero solo cambia por revisión de arquitectura. **Extendido el 2026-10-03** para la entrega de **auth (Better Auth en memoria) + endpoints `/api/v1/*` (auth, posts, feed, usuarios, admin) + documentación OpenAPI** (§8–§12); la parte del scaffold (§1–§7, §13–§15) queda como se entregó.
+> **Estado**: documento de diseño (fase de diseño, agente `security-architect`). El estado real de implementación vive en `docs/architecture/progress.md` (dinámico). Este documento NO es inmutable como `frontend-structure.md`, pero solo cambia por revisión de arquitectura. **Extendido el 2026-10-03** para la entrega de **auth (Better Auth en memoria) + endpoints `/api/v1/*` + documentación OpenAPI** (§8–§12); la parte del scaffold (§1–§7, §13–§15) queda como se entregó.
+>
+> **⚠️ Pivot a Control de Proyectos (2026-10-17)**: el dominio posts/feed fue **eliminado** (`refactor: remove posts/feed/landing domain`, commit `9989b02`) y los roles cambiaron a `admin_sistema` / `coordinador` / `aprobador` (commit `c459c16`). La API queda con auth + `GET /users/coordinadores` + `GET /users/:username` + `PATCH /admin/users/:id/role` + OpenAPI. Las secciones de posts/feed/publicaciones de este documento están **obsoletas y marcadas**; el nuevo alcance está en [`../implementation/implementation_base.md`](../implementation/implementation_base.md) y los endpoints nuevos llegan con las Fases 3–4 del pivot (`docs/pivot-project.md` §9).
 
 Referencias obligatorias:
 
@@ -10,10 +12,9 @@ Referencias obligatorias:
 - [`../security/threat-model-api.md`](../security/threat-model-api.md) — modelo de amenaza de la superficie API (emitido junto a este documento).
 - [`frontend-structure.md`](frontend-structure.md) — arquitectura frontend (inmutable): el contrato que la API debe cumplir.
 - [`../design/auth.md`](../design/auth.md) §4, §10.2 y §11.2 — validación, roles y contrato de seguridad de la transición al backend.
-- [`../../src/lib/repositories/post-repository.ts`](../../src/lib/repositories/post-repository.ts) — interfaces hexagonales `PostRepository` / `UserRepository`.
-- [`../../src/lib/types.ts`](../../src/lib/types.ts) — tipos compartidos `Post`, `PostFilters`, `Session`, `User`, `AuthorOption`, `UserRole`, etc.
-- [`../../src/lib/visibility.ts`](../../src/lib/visibility.ts) — regla de visibilidad del feed (`canViewPost`, `filterVisiblePosts`) que la API debe **replicar en servidor**.
-- [`../../src/lib/filters.ts`](../../src/lib/filters.ts) — `toSearchParams`/`fromSearchParams`: **nombres wire de los query params del feed** (`q`, `categoria`, `tipo`, `autor`, `estado`, `desde`, `hasta`).
+- [`../../src/lib/repositories/user-repository.ts`](../../src/lib/repositories/user-repository.ts) — interfaz hexagonal `UserRepository` (post-pivot: sin `PostRepository`).
+- [`../../src/lib/types.ts`](../../src/lib/types.ts) — tipos compartidos `Session`, `User`, `UserOption`, `UserRole`, etc.
+- *(eliminado con el pivot)* `visibility.ts` / `filters.ts` / `post-repository.ts` — regla de visibilidad y filtros del feed; ver historial de git y `docs/archive/`.
 - [`../implementation/implementation_base.md`](../implementation/implementation_base.md) — alcance MVP.
 
 ---
@@ -86,25 +87,22 @@ apps/api/
     │   ├── require-role.ts      → 403 si el rol no está permitido                    [esta entrega]
     │   └── csrf.ts              → doble envío x-csrf-token en mutaciones             [esta entrega]
     ├── domain/                  → puertos hexagonales (espejo del contrato frontend + extensiones de escritura API)
-    │   ├── post.ts              → Post, PostFilters, PostPage, PageOptions, PostRepository [scaffold + escritura API]
-    │   ├── user.ts              → User, UserRole, AuthorOption, UserRepository       [scaffold + extensiones API]
+    │   ├── user.ts              → User, UserRole, UserOption, UserRepository          [scaffold + extensiones API]
     │   ├── session.ts           → Session                                            [scaffold]
-    │   └── validation.ts        → esquemas zod compartidos (auth, posts, feed, admin) [esta entrega]
+    │   └── validation.ts        → esquemas zod compartidos (auth, user, admin)       [esta entrega]
     ├── application/             → casos de uso / servicios (inyectan puertos)
     │   ├── auth/                → register/signIn/getSession/signOut (Better Auth)    [esta entrega]
-    │   ├── posts/               → getFeed/getPost/createPost/updatePost/deletePost    [esta entrega]
-    │   ├── users/               → listAuthors/getProfile                              [esta entrega]
-    │   └── admin/               → setUserRole/setPostVisibility                       [esta entrega]
+    │   ├── users/               → listByRole/getProfile                              [esta entrega]
+    │   └── admin/               → setUserRole                                        [esta entrega]
     ├── routes/                  → handlers HTTP de los endpoints /api/v1/*            [esta entrega]
     │   ├── auth.routes.ts       → register/login/session/logout
-    │   ├── posts.routes.ts      → feed + CRUD
-    │   ├── users.routes.ts      → /users/authors, /users/:username
-    │   ├── admin.routes.ts      → /admin/users/:id/role, /admin/posts/:id/visibility
+    │   ├── users.routes.ts      → /users/coordinadores, /users/:username
+    │   ├── admin.routes.ts      → /admin/users/:id/role
     │   └── openapi.ts           → documento OpenAPI + /openapi.json, /docs
     └── infrastructure/          → adaptadores de los puertos
         ├── repositories/
-        │   ├── in-memory/       → user-store + InMemoryPostRepository / InMemoryUserRepository [esta entrega: contract tests]
-        │   └── postgres/        → PostgresPostRepository / PostgresUserRepository    [futuro]
+        │   ├── in-memory/       → user-store + InMemoryUserRepository                [esta entrega: contract tests]
+        │   └── postgres/        → PostgresUserRepository (+ entidades del pivot)     [futuro]
         └── auth/                → auth.config.ts + memory-auth-adapter + auth.hono.ts [esta entrega]
 ```
 
@@ -224,24 +222,22 @@ Futuras (cuando existan): `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL
 
 ## 6. Contrato hexagonal con el frontend (sin rework)
 
-La API debe cumplir a futuro las interfaces de `src/lib/repositories/post-repository.ts` y los tipos de `src/lib/types.ts`. Como el frontend es una app Next.js en la raíz y la API es otro workspace (`apps/*`), **no comparten import de TypeScript**; el contrato se materializa en dos planos:
+La API debe cumplir a futuro las interfaces de `src/lib/repositories/user-repository.ts` y los tipos de `src/lib/types.ts`. Como el frontend es una app Next.js en la raíz y la API es otro workspace (`apps/*`), **no comparten import de TypeScript**; el contrato se materializa en dos planos:
 
-1. **Puertos espejo** en `apps/api/src/domain/*` con las mismas firmas (`findVisible(filters, page, session): Promise<PostPage>`, `findById(id): Promise<Post | null>`, `listAuthors(): Promise<AuthorOption[]>`), en inglés. Los adaptadores (`infrastructure/repositories/postgres/`) los implementan; los *use cases* (`application/`) los inyectan.
-2. **Formato wire (JSON)** documentado aquí como **fuente de verdad** del intercambio. Ambos lados (frontend web y API) mapean hacia/desde este JSON. `frontend-structure.md` es inmutable y no se toca: es el frontend quien ya consume estas formas.
+1. **Puertos espejo** en `apps/api/src/domain/*` con las mismas firmas (`findByUsername(id): Promise<User | null>`, `listByRole(role): Promise<UserOption[]>`, `updateRole(id, role)`), en inglés. Los adaptadores (`infrastructure/repositories/postgres/`) los implementan; los *use cases* (`application/`) los inyectan.
+2. **Formato wire (JSON)** documentado aquí como **fuente de verdad** del intercambio. Ambos lados (frontend web y API) mapean hacia/desde este JSON.
 
 Formas wire (deben coincidir 1:1 con `src/lib/types.ts`):
 
-- `Post`: `{ id, title, content, authorId, category, type, visibility, publishedAt, createdAt, updatedAt, imageUrl }`.
-- `PostPage`: `{ items: Post[], total: number }` (de `post-repository.ts`).
-- `AuthorOption`: `{ id, username, fullName }`.
+- `UserOption`: `{ id, username, fullName }`.
 - `Session`: `{ user: { id, username, role }, expiresAt }`.
-- `User`: `{ id, username, email, givenName, familyName, role, createdAt }`.
+- `User`: `{ id, username, email, givenName, familyName, role, createdAt, bio?, avatarUrl? }`.
+- `role`: `"coordinador"`, `"aprobador"` o `"admin_sistema"` (fuente canónica: `@redfacyt/shared`, `schemas/auth.ts`).
 
 **Cómo se garantiza sin rework** (verificación):
 
-- Contract tests del API (cuando existan endpoints): fixtures con las mismas formas que `src/data/*` y asserts sobre el JSON devuelto.
-- Los filtros del feed se transmiten como query params con los **nombres wire que emite el frontend** (`toSearchParams`/`fromSearchParams` de `src/lib/filters.ts`): `q`, `categoria`, `tipo`, `autor`, `estado`, `desde`, `hasta`, más paginación `limit`/`offset` (el frontend usa `limit` creciente + `offset 0` para "Cargar más"; la API debe aceptar ese patrón). Los nombres ingleses (`keyword`, `category`, …) son **campos internos** de `PostFilters`, no params wire. **Corrección de contrato**: la versión inicial de este documento listaba nombres ingleses; el frontend real serializa en español, así que la API acepta los nombres wire de `filters.ts` (desvío registrado en `progress.md`). Detalle y esquema zod en §9.3.
-- Cualquier desvío de contrato se registra en `progress.md` (como ya ocurrió con `findAll→findVisible`).
+- Contract tests del API: fixtures con las mismas formas que `src/data/*` y asserts sobre el JSON devuelto.
+- Cualquier desvío de contrato se registra en `progress.md`.
 
 ---
 
@@ -255,16 +251,10 @@ Prefijo de versión **`/api/v1`**. La versión protege el contrato del frontend 
 | `authGateway.signUp(givenName, familyName, email, password)` | `/api/v1/auth/register` | POST | público | `{ givenName, familyName, email, password }` | `Session` + cookie |
 | `authGateway.getSession()` | `/api/v1/auth/session` | GET | sesión (cookie) | — | `Session` o 401 |
 | `authGateway.signOut()` | `/api/v1/auth/logout` | POST | sesión | — | 204 (invalida cookie) |
-| `postRepo.findVisible(filters, page, session)` | `/api/v1/posts` | GET | sesión | query: `q, categoria, tipo, autor, estado, desde, hasta, limit, offset` (ver §9.3) | `PostPage` |
-| `postRepo.findById(id)` | `/api/v1/posts/:id` | GET | sesión | — | `Post` o 404 |
-| crear publicación | `/api/v1/posts` | POST | sesión | `PostDraft` (sin `authorId`: lo toma de la sesión) | `Post` (201) |
-| editar publicación | `/api/v1/posts/:id` | PATCH | autor/admin | `PostDraft` parcial | `Post` |
-| eliminar publicación | `/api/v1/posts/:id` | DELETE | autor/admin | — | 204 |
-| `userRepo.listAuthors()` | `/api/v1/users/authors` | GET | sesión | — | `AuthorOption[]` |
-| perfil `/profile/[username]` | `/api/v1/users/:username` | GET | sesión | — | `User` (público limitado) + sus `Post[]` visibles |
-| admin: asignar rol | `/api/v1/admin/users/:id/role` | PATCH | solo `admin` | `{ role }` | 204 |
-| admin: moderar publicación | `/api/v1/admin/posts/:id/visibility` | PATCH | solo `admin` | `{ visibility: "publicado" \| "oculto" }` | `Post` |
-| subida de imagen (futuro) | `/api/v1/uploads` | POST | sesión | multipart | `{ imageUrl }` |
+| `userRepo.listByRole("coordinador")` | `/api/v1/users/coordinadores` | GET | sesión | — | `UserOption[]` |
+| perfil `/profile/[username]` | `/api/v1/users/:username` | GET | sesión | — | `User` (email ajeno redactado) |
+| admin: asignar rol | `/api/v1/admin/users/:id/role` | PATCH | solo `admin_sistema` | `{ role }` | 204 |
+| *(futuro — pivot Fase 3)* proyectos, inventario, equipos, solicitudes, prorrateo, reportes, auditoría | `/api/v1/{projects,inventory,equipment,requests,overhead,reports,audit}` | — | según rol | ver `docs/pivot-project.md` §6 | — |
 
 Restricciones transversales del mapa (requisitos de `threat-model-api.md`, verificación en ese documento):
 
@@ -284,7 +274,7 @@ Decisión del equipo (contexto técnico verificado): el MVP autentica con **Bett
 
 - Identificador de acceso: **`username`** (login por usuario, `docs/design/auth.md` §10.1). El correo es identidad de contacto y de unicidad.
 - **Unicidad**: `username` y `email` únicos (en memoria, por mapa; en PostgreSQL, índice único sobre `lower(username)` y `lower(email)`, `auth.md` §11.2).
-- **El rol no es entrada del cliente**: `role` se declara en `additionalFields` con `input: false` y `defaultValue: "estudiante"`. El registro público solo crea `estudiante`; `profesor`/`admin` los asigna exclusivamente el admin vía `PATCH /api/v1/admin/users/:id/role` (`implementation_base.md` §Vista de Admin, `auth.md` §10.2).
+- **El rol no es entrada del cliente**: `role` se declara en `additionalFields` con `input: false` y `defaultValue: "coordinador"`. El registro público solo crea `coordinador`; `aprobador`/`admin_sistema` los asigna exclusivamente el admin del sistema vía `PATCH /api/v1/admin/users/:id/role` (`implementation_base.md` §3, `auth.md` §10.2).
 - Datos adicionales del usuario como `additionalFields`: `username`, `givenName`, `familyName`, `role`. Better Auth gestiona `email`, `emailVerified`, `name` (se fija `name = givenName + " " + familyName`), `image`, `createdAt`, `updatedAt`.
 
 ### 8.2 Configuración (`infrastructure/auth/auth.config.ts`)
@@ -319,7 +309,7 @@ export function createAuth(env: Env, store: MemoryUserStore) {
         username:   { type: "string", input: true, required: true },
         givenName:  { type: "string", input: true, required: true },
         familyName: { type: "string", input: true, required: true },
-        role:       { type: "string", input: false, required: true, defaultValue: "estudiante" },
+        role:       { type: "string", input: false, required: true, defaultValue: "coordinador" },
       },
     },
     advanced: {
@@ -417,46 +407,11 @@ export const idSchema = z.string().min(1).max(64);
 export const dateParamSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/); // YYYY-MM-DD
 ```
 
-Esquemas por dominio:
+Esquemas por dominio (post-pivot: solo usuario/admin; los esquemas de posts fueron eliminados con el dominio y viven en el historial de git):
 
 ```ts
-export const postCategorySchema = z.enum(["noticias", "eventos", "defensas", "investigacion", "convocatorias"]);
-export const postTypeSchema     = z.enum(["post", "articulo", "ensenanza"]);
-export const postVisibilitySchema = z.enum(["publicado", "borrador", "oculto"]);
-export const authorVisibilitySchema = z.enum(["publicado", "borrador"]); // "oculto" solo vía admin (§9.6)
-
-export const PostDraftSchema = z.object({
-  title:      z.string().trim().min(1).max(200),
-  content:    z.string().min(1).max(10000),      // cuerpo Markdown; límite anti-DoS
-  category:   postCategorySchema,
-  type:       postTypeSchema,
-  visibility: authorVisibilitySchema,            // el autor crea publicado o borrador
-  imageUrl:   z.string().url().max(2048).nullable().optional().default(null),
-});
-export const UpdatePostSchema = PostDraftSchema.partial()
-  .refine((v) => Object.keys(v).length > 0, { message: "empty_patch" });
-export const AdminUpdatePostSchema = UpdatePostSchema.extend({
-  // Variante del PATCH /posts/:id para admin: puede fijar además "oculto" (moderación) sin pasar por /admin/posts/:id/visibility.
-  visibility: postVisibilitySchema.optional(),
-});
-export const AdminSetVisibilitySchema = z.object({
-  visibility: z.enum(["publicado", "oculto"]),   // ocultar o restaurar
-});
 export const SetUserRoleSchema = z.object({
-  role: z.enum(["estudiante", "profesor", "admin"]),
-});
-
-export const FeedQuerySchema = z.object({
-  // Nombres wire en español = los que emite `toSearchParams` (src/lib/filters.ts): §6 y §9.3.
-  q:          z.string().trim().max(80).optional().default(""),
-  categoria:  z.enum(["noticias", "eventos", "defensas", "investigacion", "convocatorias", "todas"]).optional().default("todas"),
-  tipo:       z.enum(["post", "articulo", "ensenanza", "todos"]).optional().default("todos"),
-  autor:      z.string().max(64).optional().default("todos"),
-  estado:     z.enum(["publicado", "borrador", "oculto", "todos"]).optional().default("todos"),
-  desde:      dateParamSchema.nullable().optional().default(null),
-  hasta:      dateParamSchema.nullable().optional().default(null),
-  limit:      z.coerce.number().int().min(1).max(100).optional().default(6), // el web usa múltiplos de 6 ("Cargar más")
-  offset:     z.coerce.number().int().min(0).optional().default(0),
+  role: z.enum(["coordinador", "aprobador", "admin_sistema"]),
 });
 ```
 
@@ -469,58 +424,36 @@ export const FeedQuerySchema = z.object({
 | `/auth/session` | GET | cookie | — | `200` `Session` \| `401` | sesión válida y no expirada |
 | `/auth/logout` | POST | cookie | — | `204` | sesión; CSRF |
 
-- **register** → `201` con `Session` (forma wire) y `Set-Cookie`. Conflicto de `email` o de `username` derivado → `409` **genérico idéntico** `{ "error": "account_conflict", "message": "No pudimos crear la cuenta. Intenta de nuevo." }` (nunca diferenciar email vs. username; joya P0 anti-enumeración, R12). El `role` que llegara en el body se **ignora** (el registro solo crea `estudiante`).
+- **register** → `201` con `Session` (forma wire) y `Set-Cookie`. Conflicto de `email` o de `username` derivado → `409` **genérico idéntico** `{ "error": "account_conflict", "message": "No pudimos crear la cuenta. Intenta de nuevo." }` (nunca diferenciar email vs. username; joya P0 anti-enumeración, R12). El `role` que llegara en el body se **ignora** (el registro solo crea `coordinador`).
 - **login** → fallo (usuario inexistente o contraseña incorrecta) → `401` idéntico `{ "error": "invalid_credentials", "message": "El usuario o la contraseña no coinciden." }`. Flujo: resuelve `username → email` (repo), delega en `auth.api.signInEmail`; si el username no existe devuelve el **mismo** `401` (hash señuelo para tiempo constante, R13).
 - **session** → devuelve `{ user: { id, username, role }, expiresAt }` (1:1 `Session`). El `role` se **re-lee del store por petición** (rol fresco, R14), no del claim del JWT.
 - **logout** → `204`; se descarta/expira la sesión (en stateless: se borra la cookie; opcional lista negra en memoria de tokens revocados, §11.3).
 
-### 9.3 Posts y feed
+### 9.3 ~~Posts y feed~~ — eliminado con el pivot
 
-| Ruta | Método | Acceso | Request | Respuesta | Enforcement |
-| --- | --- | --- | --- | --- | --- |
-| `/posts` | GET | autenticado | query `FeedQuerySchema` | `200` `PostPage` | sesión; visibilidad session-aware (R11/R15) |
-| `/posts/:id` | GET | autenticado | path `idSchema` | `200` `Post` \| `404` | sesión + `canViewPost`; no visible → `404` |
-| `/posts` | POST | autenticado | `PostDraftSchema` | `201` `Post` | sesión; `authorId` desde sesión (nunca del body) |
-| `/posts/:id` | PATCH | autor o admin | `UpdatePostSchema` | `200` `Post` \| `403` \| `404` | propietario/admin (IDOR, R15) |
-| `/posts/:id` | DELETE | autor o admin | — | `204` \| `403` \| `404` | propietario/admin (IDOR, R15) |
-
-**Feed (`GET /posts`)** — réplica de `src/lib/visibility.ts` + `applyFilters` de `src/lib/filters.ts`:
-1. Visibilidad: `canViewPost` (publicado → todos; borrador → autor; oculto → autor y admin).
-2. Filtros (sobre lo visible): `q` en título y cuerpo (normalización sin diacríticos), `categoria`, `tipo`, `autor`, `estado`, `desde`, `hasta`.
-3. Orden `publishedAt` DESC; paginación `limit`/`offset`.
-4. Mapa de query a `PostFilters`: `q→keyword`, `categoria→category`, `tipo→type`, `autor→authorId`, `estado→status`, `desde→dateFrom`, `hasta→dateTo`.
-
-**Crear (`POST /posts`)**: `authorId` = `session.user.id` (inmutable en el body). `createdAt = updatedAt = publishedAt = now` (ISO). Respuesta `201` `Post` completo.
-
-**Editar (`PATCH /posts/:id`)**: campos editables: `title`, `content`, `category`, `type`, `visibility` (autor: solo `publicado`/`borrador`; admin: además `oculto`), `imageUrl`. **No editables**: `id`, `authorId`, `createdAt`, `publishedAt`. `publishedAt` se fija a `now` solo en la transición `borrador → publicado`; el resto de transiciones lo conservan (`updatedAt = now` siempre). No-propietario y no-admin → `403`; id inexistente → `404`.
-
-**Eliminar (`DELETE /posts/:id`)**: `204` sin cuerpo. No-propietario y no-admin → `403`.
+> Los endpoints `GET/POST/PATCH/DELETE /posts` y el feed fueron **eliminados** en la Fase 1 del pivot (commit `9989b02`). El detalle de su especificación (esquemas `PostDraftSchema`/`FeedQuerySchema`, regla de visibilidad y enforcement propietario/admin) está en el historial de git de este documento y en [`docs/archive/`](../archive/). Los endpoints del nuevo dominio (proyectos, inventario, equipos, solicitudes, prorrateo, reportes, auditoría) se especificarán en la Fase 3 del pivot.
 
 ### 9.4 Usuarios
 
 | Ruta | Método | Acceso | Request | Respuesta | Enforcement |
 | --- | --- | --- | --- | --- | --- |
-| `/users/authors` | GET | autenticado | — | `200` `AuthorOption[]` | sesión |
-| `/users/:username` | GET | autenticado | path `usernameSchema` | `200` `{ user: User, posts: Post[] }` \| `404` | sesión; email redactado salvo propio/admin |
+| `/users/coordinadores` | GET | autenticado | — | `200` `UserOption[]` | sesión |
+| `/users/:username` | GET | autenticado | path `usernameSchema` | `200` `{ user: User }` \| `404` | sesión; email redactado salvo propio/admin_sistema |
 
-- **`/users/authors`**: `listAuthors()` → `AuthorOption[]` (`{ id, username, fullName }`), orden `fullName` locale `"es"`, solo usuarios con al menos una publicación. **Nunca** incluye `email` ni `role`.
-- **`/users/:username`**: devuelve `User` (forma wire) + `posts` = `findVisible({ ...DEFAULT, authorId: user.id }, { limit: 100, offset: 0 }, session)`. **Email redactado**: si el perfil es de otro usuario y el llamante no es admin, `user.email = ""` (mantiene la forma 1:1 de `User` sin filtrar PII). `username` inexistente → `404` genérico (anti-enumeración, R18).
+- **`/users/coordinadores`**: `listByRole("coordinador")` → `UserOption[]` (`{ id, username, fullName }`), orden `fullName` locale `"es"`, solo usuarios con rol `coordinador` (selectores del sistema, `pivot-project.md` §7). **Nunca** incluye `email` ni `role`.
+- **`/users/:username`**: devuelve `User` (forma wire). **Email redactado**: si el perfil es de otro usuario y el llamante no es `admin_sistema`, `user.email = ""` (mantiene la forma 1:1 de `User` sin filtrar PII). `username` inexistente o inválido → `404`/`400` genérico (anti-enumeración, R18).
 
 ### 9.5 Admin (asignación de rol)
 
 | Ruta | Método | Acceso | Request | Respuesta | Enforcement |
 | --- | --- | --- | --- | --- | --- |
-| `/admin/users/:id/role` | PATCH | solo `admin` | `SetUserRoleSchema` | `204` \| `404` \| `409`/`422` | rol admin verificado en servidor por petición (R16) |
+| `/admin/users/:id/role` | PATCH | solo `admin_sistema` | `SetUserRoleSchema` | `204` \| `400` \| `403` \| `404` | rol verificado en servidor por petición (R16) |
 
-Cambia `role` en el store; el efecto es inmediato para la siguiente petición (rol fresco, R14). `id` inexistente → `404`. **El rol `admin` es inmutable** (decisión de producto 2026-10-09, `wireframes_admin.md` §1.4 D2): el endpoint rechaza (`409`/`422`) toda transición que salga de `admin`, tanto propia como de otro admin. Ya **no** es un riesgo asumido: convierte el lock-out en control (R16 de `threat-model-api.md`). El alta/baja de administradores es operativa (seed/ambiente), no por API.
+Cambia `role` en el store; el efecto es inmediato para la siguiente petición (rol fresco, R14). `id` inexistente → `404`. **El rol `admin_sistema` es inmutable** (decisión de producto 2026-10-09, `wireframes_admin.md` §1.4 D2): el endpoint rechaza (`403`) toda transición que salga de `admin_sistema`, tanto propia como de otro admin. Ya **no** es un riesgo asumido: convierte el lock-out en control (R16 de `threat-model-api.md`). El alta/baja de administradores es operativa (seed/ambiente), no por API.
 
-### 9.6 Admin (moderación de publicaciones)
+### 9.6 ~~Admin (moderación de publicaciones)~~ — eliminado con el pivot
 
-| Ruta | Método | Acceso | Request | Respuesta | Enforcement |
-| --- | --- | --- | --- | --- | --- |
-| `/admin/posts/:id/visibility` | PATCH | solo `admin` | `AdminSetVisibilitySchema` | `200` `Post` \| `404` \| `409`/`422` | rol admin (R16) |
-
-Oculta (`visibility: "oculto"`) o restaura (`"publicado"`) una publicación **ya publicada** (nunca un `borrador` ajeno: el endpoint rechaza (`409`/`422`) moderar un post en `borrador`, F-03). Es el **único** camino para fijar `oculto` (el autor no puede). `404` si el id no existe. La visibilidad resultante se refleja de inmediato en el feed (R15).
+> El endpoint `PATCH /admin/posts/:id/visibility` fue eliminado junto con el dominio de publicaciones (commit `9989b02`). Su especificación histórica está en el historial de git y en [`docs/archive/`](../archive/).
 
 ---
 
@@ -558,7 +491,7 @@ export const openApiDoc = {
 
 ### 10.3 Contenido
 
-Solo formas wire (`Post`, `PostPage`, `AuthorOption`, `Session`, `User`, `UserRole`) y cuerpos de petición (`PostDraft`, `Login`, `Register`, `SetUserRole`, `SetPostVisibility`, `FeedQuery`). Errores documentados como respuestas genéricas (`400/401/403/404/409/429/413`).
+Solo formas wire (`UserOption`, `Session`, `User`, `UserRole`) y cuerpos de petición (`Login`, `Register`, `SetUserRole`). Errores documentados como respuestas genéricas (`400/401/403/404/409/429/413`).
 
 ---
 
@@ -569,14 +502,11 @@ Solo formas wire (`Post`, `PostPage`, `AuthorOption`, `Session`, `User`, `UserRo
 ```
 apps/api/src/infrastructure/repositories/in-memory/
 ├── user-store.ts                       → MemoryUserStore (mapas user/session/account/verification + índices byUsername/byEmail)
-├── in-memory-post-repository.ts        → InMemoryPostRepository (findVisible/findById/create/update/delete)
-├── in-memory-post-repository.test.ts   → contract tests (espejo de post-repository.contract.test.ts + escritura)
-├── in-memory-user-repository.ts        → InMemoryUserRepository (listAuthors/findById/findByUsername/updateRole)
+├── in-memory-user-repository.ts        → InMemoryUserRepository (listByRole/findById/findByUsername/updateRole)
 └── in-memory-user-repository.test.ts   → contract tests
 ```
 
 - **`MemoryUserStore`**: única fuente de verdad de usuarios del MVP. `InMemoryUserRepository` **y** `MemoryAuthAdapter` leen/escriben el mismo store → el cambio de rol por admin es visible para la autorización de inmediato (R14) y los usuarios creados por Better Auth quedan visibles para los casos de uso.
-- **`InMemoryPostRepository`**: implementa la parte de lectura espejo (`findVisible`, `findById`) **y** las extensiones de escritura de la API (§11.3). `findVisible` replica `canViewPost` → `applyFilters` → orden `publishedAt` DESC → paginación.
 
 ### 11.2 `application/` (casos de uso que inyectan puertos)
 
@@ -593,54 +523,37 @@ export async function signInUser(auth: Auth, users: UserRepository, cmd: { usern
 export async function getCurrentSession(auth: Auth, req: HonoRequest): Promise<Session | null>; // rol fresco (R14)
 export async function signOutUser(auth: Auth, req: HonoRequest): Promise<void>;
 
-// application/posts/*
-export function createPost(deps: { posts: PostRepository; now?: () => Date }): (draft: PostDraft, session: Session) => Promise<Post>;
-export function updatePost(deps: { posts: PostRepository; now?: () => Date }): (id: string, patch: UpdatePost, session: Session) => Promise<Post>;
-export function deletePost(deps: { posts: PostRepository }): (id: string, session: Session) => Promise<void>;
-export function getPost(deps: { posts: PostRepository }): (id: string, session: Session) => Promise<Post>;
-export function getFeed(deps: { posts: PostRepository }): (filters: PostFilters, page: PageOptions, session: Session) => Promise<PostPage>;
-
 // application/users/*
-export function listAuthors(deps: { users: UserRepository; posts: PostRepository }): () => Promise<AuthorOption[]>;
-export function getProfile(deps: { users: UserRepository; posts: PostRepository }): (username: string, session: Session) => Promise<{ user: User; posts: Post[] }>;
+export function listByRole(deps: { users: UserRepository }): (role: UserRole) => Promise<UserOption[]>;
+export function getProfile(deps: { users: UserRepository }): (username: string, session: Session) => Promise<{ user: User }>;
 
 // application/admin/*
 export function setUserRole(deps: { users: UserRepository }): (id: string, role: UserRole) => Promise<void>;
-export function setPostVisibility(deps: { posts: PostRepository }): (id: string, visibility: "publicado" | "oculto") => Promise<Post>;
 ```
 
-### 11.3 Extensiones de puertos (solo API; no rompen el espejo frontend)
+> Los casos de uso de posts (`application/posts/*`: createPost/updatePost/deletePost/getPost/getFeed) y `setPostVisibility` fueron **eliminados** con el dominio (commit `9989b02`); su firma histórica está en el historial de git.
+
+### 11.3 Puertos (dominio)
 
 ```ts
-// domain/post.ts — extensión de PostRepository (el frontend solo usa la parte de lectura)
-export type PostDraft = { title: string; content: string; category: PostCategory; type: PostType; visibility: "publicado" | "borrador"; imageUrl: string | null };
-export interface PostRepository {
-  findVisible(filters: PostFilters, page: PageOptions, session: Session): Promise<PostPage>;   // espejo frontend
-  findById(id: string): Promise<Post | null>;                                                  // espejo frontend
-  create(draft: PostDraft & { authorId: string; publishedAt: string; createdAt: string; updatedAt: string }): Promise<Post>;
-  update(id: string, patch: UpdatePost): Promise<Post | null>;
-  delete(id: string): Promise<boolean>;
-}
-
-// domain/user.ts — extensión de UserRepository
+// domain/user.ts
 export interface UserRepository {
-  listAuthors(): Promise<AuthorOption[]>;                    // espejo frontend
+  listByRole(role: UserRole): Promise<UserOption[]>;         // espejo frontend (antes listAuthors)
   findById(id: string): Promise<User | null>;
   findByUsername(username: string): Promise<User | null>;
   updateRole(id: string, role: UserRole): Promise<User | null>;
 }
 ```
 
-> La extensión no rompe el contrato del frontend: el web nunca implementó puertos de escritura; los writes llegan vía API. El espejo de lectura queda intacto (`findVisible`, `findById`, `listAuthors`).
+> El puerto `PostRepository` completo fue eliminado con el dominio de publicaciones.
 
 ### 11.4 `routes/` y middleware
 
 ```
 apps/api/src/routes/
 ├── auth.routes.ts      → register/login/session/logout (wrapper de auth.api.*)
-├── posts.routes.ts     → feed + CRUD
-├── users.routes.ts     → /users/authors, /users/:username
-├── admin.routes.ts     → /admin/users/:id/role, /admin/posts/:id/visibility
+├── users.routes.ts     → /users/coordinadores, /users/:username
+├── admin.routes.ts     → /admin/users/:id/role
 └── openapi.ts          → documento OpenAPI + /openapi.json, /docs
 ```
 
@@ -666,35 +579,30 @@ export function csrf(trustedOrigins: string[]): MiddlewareHandler;
 
 ### 12.1 Contract tests de formas wire
 
-- Fixtures con las formas exactas de `src/data/*` y asserts del JSON devuelto **1:1** con `Post`, `PostPage`, `AuthorOption`, `Session`, `User` (sin campos extra ni ausentes).
-- Replicar el contrato de visibilidad del feed: portar las **9 combinaciones** de `src/lib/visibility.test.ts` al `in-memory-post-repository.test.ts` (publicado/borrador/oculto × autor/otro/admin).
+- Fixtures con las formas exactas de `src/data/*` y asserts del JSON devuelto **1:1** con `UserOption`, `Session`, `User` (sin campos extra ni ausentes).
 
 ### 12.2 Tests de ruta (por endpoint y por regla de enforcement)
 
 | Regla | Test mínimo |
 | --- | --- |
-| Auth register `201/400/409/429` | payload válido → 201 + cookie; cada regla de `auth.md` §4 inválida → 400 con detalle de campo; email duplicado → 409 genérico **idéntico** a username duplicado; body con `role` → ignorado (usuario creado `estudiante`); N+1 registros/IP → 429 |
+| Auth register `201/400/409/429` | payload válido → 201 + cookie; cada regla de `auth.md` §4 inválida → 400 con detalle de campo; email duplicado → 409 genérico **idéntico** a username duplicado; body con `role` → ignorado (usuario creado `coordinador`); N+1 registros/IP → 429 |
 | Auth login `200/401/429` | login OK → 200 `Session` + cookie nueva; usuario inexistente y contraseña incorrecta → **exactamente el mismo** 401; N+1 fallos → 429 |
 | Auth session/logout | cookie válida → 200; sin cookie → 401; cookie firmada con otro secreto → 401; expirada → 401; logout → 204 y session posterior → 401 |
 | CSRF | mutación sin `x-csrf-token` (con `Origin` presente) → 403 |
-| Feed `GET /posts` | `publicado` visible a todos; `borrador`/`oculto` ajenos fuera de resultados; admin ve `oculto` pero **no** `borrador` ajeno; filtros y paginación por contrato; query inválida → 400 |
-| `GET /posts/:id` | borrador propio → 200; borrador/oculto ajeno → 404 |
-| `POST /posts` | 201 con `authorId` de la sesión; body con `authorId`/`role` inyectado → ignorado; payload inválido → 400 |
-| `PATCH`/`DELETE /posts/:id` | post ajeno → 403; propio → 200/204; admin sobre cualquiera → 200/204; `publishedAt` inmutable (PATCH que lo envía → ignorado) |
-| `GET /users/authors` | solo autores con publicaciones; sin `email`/`role` |
-| `GET /users/:username` | propio/admin → email completo; ajeno → email `""`; inexistente → 404 |
-| `PATCH /admin/users/:id/role` | estudiante/profesor → 403; admin → 204 y el rol cambia en el store; id inexistente → 404 |
-| `PATCH /admin/posts/:id/visibility` | no-admin → 403; admin `oculto`/`publicado` → 200 y el feed lo refleja |
+| `GET /users/coordinadores` | solo usuarios con rol `coordinador`; sin `email`/`role`; orden `es` |
+| `GET /users/:username` | propio/admin_sistema → email completo; ajeno → email `""`; inexistente → 404 |
+| `PATCH /admin/users/:id/role` | coordinador/aprobador → 403; admin_sistema → 204 y el rol cambia en el store; id inexistente → 404 |
 | OpenAPI | `NODE_ENV=production` → `/api/v1/openapi.json` y `/docs` → 404; dev → 200 sin secretos ni valores internos |
+
+> Las filas de los endpoints de posts/feed (`GET /posts`, `GET/POST/PATCH/DELETE /posts/:id`, `PATCH /admin/posts/:id/visibility`) se eliminaron con el dominio (commit `9989b02`).
 
 ### 12.3 Definition of Done de esta entrega
 
 1. `pnpm --filter @red-facyt/api test:coverage` ≥ 80% (nuevos módulos incluidos); `typecheck` y `lint` limpios.
 2. Todas las rutas de §9 responden según el código y la forma wire especificados, con la matriz de enforcement de §12.2 probada.
-3. El feed replica las 9 combinaciones de `visibility.ts` (contract test).
-4. OpenAPI visible en dev, bloqueado en producción; sin secretos (test de grep).
-5. Cookies `httpOnly`/`SameSite=Lax`/`Secure`(prod) verificadas por test de headers; CSRF en mutaciones.
-6. El `developer` registra en `progress.md`: rutas implementadas, desvíos (nombres wire de query, rutas de opciones de Better Auth confirmadas contra la versión fijada) y estado del Kanban.
+3. OpenAPI visible en dev, bloqueado en producción; sin secretos (test de grep).
+4. Cookies `httpOnly`/`SameSite=Lax`/`Secure`(prod) verificadas por test de headers; CSRF en mutaciones.
+5. El `developer` registra en `progress.md`: rutas implementadas, desvíos (nombres wire de query, rutas de opciones de Better Auth confirmadas contra la versión fijada) y estado del Kanban.
 
 ---
 

@@ -1,4 +1,5 @@
 # Especificación de Diseño: Pantalla de Bienvenida `/` — Red FaCyT (Estrategia Slider Mobile-First)
+> **Pivot 2026-10-17**: esta pantalla fue **eliminada** con el dominio anterior (commit `9989b02`); el documento se conserva como referencia histórica. El nuevo dominio tendrá sus propios wireframes (Fase 2, `docs/pivot-project.md` §5).
 
 **Documento de especificación accionable para el agente `developer`.** Define la arquitectura visual, la estrategia de color neutro oscuro, el componente de deslizante interactivo (slider), la experiencia de usuario mobile-first y el flujo de onboarding cliente.
 

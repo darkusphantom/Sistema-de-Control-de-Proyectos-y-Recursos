@@ -155,7 +155,7 @@ Estos elementos son específicos del dominio de Red FaCyT y no tienen equivalent
 - `wireframes_post_detail.md` — wireframes del detalle de publicación
 - `wireframes_welcome.md` — la bienvenida del slider de Red FaCyT
 
-> **Nota:** `docs/Proyecto1_Junio2026.md` se ARCHIVA en `docs/archive/`, no se elimina.
+> **Nota:** `docs/Proyecto1_Junio2026.md` quedó ARCHIVADO en `docs/archive/Proyecto1_Junio2026.md`, no se eliminó.
 
 ---
 

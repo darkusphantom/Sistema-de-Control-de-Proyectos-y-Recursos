@@ -9,9 +9,10 @@ Guía maestra de Red FaCyT para agentes de IA. **Debe leerse completa antes de c
 
 ## 1. Proyecto
 
-**Red FaCyT** — Red institucional de la Facultad Experimental de Ciencias y Tecnología: publicación y consulta de contenidos académicos, estudiantiles e institucionales.
+**Sistema de Control de Proyectos y Recursos** — gestión de proyectos científicos y sus recursos (inventario, equipos, despachos, solicitudes de gasto, prorrateo, reportes y auditoría) en la Facultad Experimental de Ciencias y Tecnología (FACYT). Proyecto pivoteado desde "Red FaCyT" (red de publicación académica; ver [`docs/archive/`](docs/archive/)).
 
-- **Spec completa**: [`docs/Proyecto1_Junio2026.md`](docs/Proyecto1_Junio2026.md)
+- **Enunciado del pivot**: [`docs/PIVOT-enunciado-control-de-proyectos-quimicos.md`](docs/PIVOT-enunciado-control-de-proyectos-quimicos.md)
+- **Plan de pivot**: [`docs/pivot-project.md`](docs/pivot-project.md)
 - **Objetivo y reglas del proyecto**: [`OBJECTIVE.md`](OBJECTIVE.md)
 - **Alcance de implementación**: [`docs/implementation/implementation_base.md`](docs/implementation/implementation_base.md)
 - **Arquitectura frontend (inmutable)**: [`docs/architecture/frontend-structure.md`](docs/architecture/frontend-structure.md)
@@ -95,7 +96,7 @@ Leer SIEMPRE [`docs/security/crown-jewels.md`](docs/security/crown-jewels.md): d
 - Validación de datos en **frontend y backend**.
 - Protección de rutas privadas.
 - Contraseñas con hash (**nunca texto plano**).
-- Control de acceso por rol (Estudiante / Profesor / Admin) **en el servidor** (enforcement server-side, nunca solo cliente).
+- Control de acceso por rol (Coordinador / Aprobador / Admin del Sistema) **en el servidor** (enforcement server-side, nunca solo cliente).
 - Manejo básico de errores sin exponer información sensible.
 - No exponer secretos ni datos sensibles en el repo ni en bundles.
 

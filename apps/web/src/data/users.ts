@@ -4,8 +4,8 @@ import { User } from "@/lib/types";
  * Mock user dataset for the static frontend phase.
  * Credentials (passwords) are strictly NOT stored here.
  *
- * Distribution (docs/design/wireframes_feed.md §4.6):
- * - 1 admin
+ * Distribution (roles from `docs/pivot-project.md` §7):
+ * - 1 admin_sistema
  * - 1 aprobador
  * - 3 coordinadores (one of which is the default session user)
  */

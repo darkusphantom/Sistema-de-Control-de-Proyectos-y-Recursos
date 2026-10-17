@@ -1,5 +1,7 @@
 # Autenticación — Red FaCyT (`/login` y `/register`)
 
+> **Nota tras el pivot (2026-10-17)**: se actualizaron los roles (`coordinador`/`aprobador`/`admin_sistema`) y el destino post-login (`/dashboard`). El registro público solo crea `coordinador`. El copy de bienvenida ("Accede a Red FaCyT…") y los tokens visuales se rediseñarán en la **Fase 2** del pivot (estilo Apple); el comportamiento y la accesibilidad de este documento siguen vigentes.
+
 Especificación de diseño de las dos pantallas públicas del route group
 `(auth)`. El `developer` implementa este documento tal cual y el
 `qa-reviewer` valida el resultado contra él.
@@ -129,7 +131,7 @@ es deliberadamente genérico para que no se lea como una regla.
 | Enlace inferior             | `Volver a la bienvenida`                                                    | `Volver a la bienvenida`                                          |
 | Error de servidor (login)   | `El usuario o la contraseña no coinciden.`                                  | —                                                                 |
 | Error de servidor (registro)| —                                                                           | `No pudimos crear la cuenta. Intenta de nuevo.`                   |
-| Éxito                       | redirige a `/feed`                                                          | redirige a `/feed` (con sesión iniciada)                          |
+| Éxito                       | redirige a `/dashboard`                                                    | redirige a `/dashboard` (con sesión iniciada)                      |
 
 Voz de la interfaz (`brief.md` §6): frases cortas, sin disculpas, sin
 "Ha ocurrido un error". El mensaje de credenciales **no** distingue usuario
@@ -149,7 +151,7 @@ correcto; una sesión persistente sin explicación explícita sería un riesgo.
 | Enviando                               | `<form aria-busy="true">`, botón `disabled` (opacity 60), `enterKeyHint` desactivado y guarda anti doble envío en el handler. **Sin spinner**: el cambio de etiqueta más `aria-busy` comunican el estado y funcionan con `prefers-reduced-motion` (la regla global de `globals.css` congela cualquier animación). |
 | Credenciales inválidas                 | Caja `role="alert"` encima, foco movido a ella, `aria-invalid` en los campos, **usuario conservado y contraseña vaciada** (§11.1).                                                                                                      |
 | Error de validación en registro        | Se conservan **todos** los valores escritos: reescribir cinco campos por un error de tecleo es más costoso que el riesgo de que queden a la vista.                                                                                    |
-| Éxito                                  | `router.replace("/feed")` — `replace`, no `push`: `/login` no debe quedar en el historial del navegador.                                                                                                                              |
+| Éxito                                  | `router.replace("/dashboard")` — `replace`, no `push`: `/login` no debe quedar en el historial del navegador.                                                                                                                        |
 | Navegación `/login` ↔ `/register`      | Enlace `<a>` real con `prefetch`. El formulario se desmonta al navegar, así que **no** se conserva lo escrito; el copy no promete lo contrario.                                                                                        |
 
 **Momento de la validación:** al enviar. Después del primer envío fallido, cada
@@ -278,7 +280,7 @@ se resuelve reutilizando `--text-muted` (§8.3).
 | `src/components/ui/form-alert.tsx`                      | crear                  | Caja de error y resumen: `role="alert"`, `tabIndex={-1}`, ítems que enfocan su campo                 |
 | `src/components/forms/login-form.tsx`                   | crear                  | Cliente: estado, validación, envío, `noValidate`, guarda anti doble envío                              |
 | `src/components/forms/register-form.tsx`                | crear                  | Cliente: lo anterior más la coincidencia de contraseñas                                               |
-| `src/components/auth/auth-guard.tsx`                    | crear                  | Cliente: si hay sesión, `router.replace("/feed")`; mismo patrón que `welcome-gate.tsx`                 |
+| `src/components/auth/auth-guard.tsx`                    | crear                  | Cliente: si hay sesión, `router.replace("/dashboard")`                |
 | `src/components/ui/icons.tsx`                           | modificar              | Añadir `AlertTriangleIcon` con el patrón existente (SVG propio, sin emoji)                             |
 | `src/lib/validation/auth.ts`                            | crear                  | Validadores **puros** por campo y `validateLogin` / `validateRegister`, con los mensajes de §4         |
 | `src/lib/auth/auth-gateway.ts`                          | crear                  | Interfaz: `signIn`, `signUp`, `getSession`, `signOut`                                                 |
@@ -313,14 +315,15 @@ ambos deben ser únicos e independientes entre sí.
 
 ### 10.2 El registro no ofrece selector de rol
 
-El registro público crea usuarios con rol `estudiante`; `profesor` y `admin` los
-asigna un administrador desde `/admin`, cuya única función es precisamente
-asignar roles (`implementation_base.md` §Vista de Admin).
+El registro público crea usuarios con rol `coordinador` (por defecto en Better
+Auth); `aprobador` y `admin_sistema` los asigna un administrador del sistema
+desde `/admin`, cuya única función es precisamente asignar roles
+(`implementation_base.md` §3).
 
-Justificación: el enunciado solo exige diferenciar usuario común de usuario con
-funciones de administración o moderación (`Proyecto1_Junio2026.md` §a), y un
-selector abierto en el registro público permite autoasignarse permisos. Es además
-menos superficie de UI y de validación.
+Justificación: el enunciado exige diferenciar roles con responsabilidades
+distintas (`docs/PIVOT-enunciado-control-de-proyectos-quimicos.md`), y un
+selector abierto en el registro público permite autoasignarse permisos. Es
+además menos superficie de UI y de validación.
 
 **Consecuencia:** la tabla de rutas de `frontend-structure.md` L117 ya no lista
 "rol Estudiante/Profesor" en `/register`; se corrigió a nombre, apellido, correo
@@ -391,8 +394,8 @@ es duplicación que conviene eliminar.
 
 - **La contraseña nunca se almacena en texto plano.** `src/data/users.ts` guarda
   credenciales **ficticias** y el archivo se rotula como mock. El enunciado lo
-  exige (`Proyecto1_Junio2026.md` §a) y se cumple de verdad cuando llegue el
-  backend (§11.2).
+  exige (`docs/PIVOT-enunciado-control-de-proyectos-quimicos.md`) y se cumple de
+  verdad cuando llegue el backend (§11.2).
 - **Ningún registro de credenciales.** Ni `console.log` del formulario, ni volcado
   de props en un error boundary, ni trazas de Server Actions con el cuerpo de la
   petición.

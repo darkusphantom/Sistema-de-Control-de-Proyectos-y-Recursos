@@ -1,4 +1,5 @@
 # Accesibilidad y Usabilidad — Red FaCyT (Especificación Slider)
+> **Pivot 2026-10-17**: la identidad visual se rediseña en la Fase 2 (estilo Apple, `docs/pivot-project.md` §8); los tokens y el copy de este documento quedan **pendientes de rediseño**, mientras que estructura, estados y accesibilidad siguen vigentes.
 
 Directrices estricta de accesibilidad basadas en las guías **WCAG 2.2 Nivel AA** aplicadas a la nueva pantalla de bienvenida en formato **deslizante (slider/carrusel)**.
 

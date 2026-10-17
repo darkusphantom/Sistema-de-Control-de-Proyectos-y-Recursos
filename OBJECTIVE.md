@@ -1,6 +1,12 @@
 # Objetivo del Proyecto
 
-El objetivo del proyecto se encuentra en [Proyecto1_Junio2026.md](/docs/Proyecto1_Junio2026.md).
+El proyecto es el **Sistema de Control de Proyectos y Recursos** de la Facultad Experimental de Ciencias y Tecnología (FACYT):
+
+- Enunciado original del pivot: [PIVOT-enunciado-control-de-proyectos-quimicos.md](/docs/PIVOT-enunciado-control-de-proyectos-quimicos.md)
+- Plan de pivot (diagnóstico, mapa de rutas, roles y fases): [pivot-project.md](/docs/pivot-project.md)
+- Alcance del MVP vigente: [implementation_base.md](/docs/implementation/implementation_base.md)
+
+La especificación del proyecto académico anterior (Red FaCyT) está archivada en [docs/archive/Proyecto1_Junio2026.md](/docs/archive/Proyecto1_Junio2026.md).
 
 ## Fases de implementacion
 
@@ -33,7 +39,7 @@ No se puede saltar ningun paso y cada implementacion tiene que tener su fase de 
 - NextJS
 - PostgreSQL
 - Vercel
-- Para la construccion de la API esta en proceso de seleccion el framework
+- Hono (API REST en `apps/api`)
 - Husky
 - PNPM
 - Vitest
