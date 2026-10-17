@@ -9,7 +9,7 @@ import { ForbiddenError, UnauthorizedError } from "../application/errors";
  * Responde 403 si el rol FRESCO de `c.var.session` no está en la lista
  * permitida. Debe ejecutarse DESPUÉS de `requireSession` (que fija la sesión).
  *
- * @param roles - Roles permitidos (p. ej. `requireRole("admin")`).
+ * @param roles - Roles permitidos (p. ej. `requireRole("admin_sistema")`).
  * @returns Middleware de Hono.
  */
 export function requireRole(...roles: UserRole[]): MiddlewareHandler {

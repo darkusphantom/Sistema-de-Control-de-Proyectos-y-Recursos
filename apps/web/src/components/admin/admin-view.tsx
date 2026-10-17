@@ -9,16 +9,16 @@ import { AdminUsersSection } from "./admin-users-section";
 import type { User, UserRole } from "@/lib/types";
 
 /**
- * Admin Dashboard view component for role assignment.
+ * Vista del panel de administración para la asignación de roles.
  *
- * Design spec (`docs/design/wireframes_admin.md`):
- * - Restricted to `admin` role; redirects non-admin users to `/feed`.
- * - Interactive user management table with role assignment.
+ * Especificación de diseño (`docs/design/wireframes_admin.md`):
+ * - Restringida al rol `admin_sistema`; redirige al resto a `/dashboard`.
+ * - Tabla interactiva de gestión de usuarios con asignación de rol.
  *
- * Note: the publication-moderation section was removed in the Red FaCyT
- * pivot; catalogs, users and audit management will replace it.
+ * Nota: la sección de moderación de publicaciones se eliminó en el pivot de
+ * Red FaCyT; la gestión de catálogos, usuarios y auditoría la sustituirá.
  *
- * @returns The admin section dashboard view.
+ * @returns La vista del panel de administración.
  */
 export function AdminView() {
   const router = useRouter();
@@ -27,11 +27,11 @@ export function AdminView() {
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const isAdmin = session?.user.role === "admin";
+  const isAdmin = session?.user.role === "admin_sistema";
 
   useEffect(() => {
     if (status === "authenticated" && !isAdmin) {
-      router.replace("/feed");
+      router.replace("/dashboard");
     }
   }, [status, isAdmin, router]);
 

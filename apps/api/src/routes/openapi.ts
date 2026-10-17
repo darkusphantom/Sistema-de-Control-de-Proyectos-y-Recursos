@@ -18,7 +18,7 @@ export type OpenApiDocument = {
 /**
  * Documento OpenAPI 3.1 de la API (requisito R17).
  *
- * Solo formas wire (`AuthorOption`, `Session`, `User`) y
+ * Solo formas wire (`UserOption`, `Session`, `User`) y
  * cuerpos de petición; sin secretos, valores de env, rutas internas ni
  * esquemas de BD. La vía elegida es el **documento manual** (alternativa
  * aceptada por `api-structure.md` §10.1: "documento manual con
@@ -61,7 +61,7 @@ export const openApiDocument: OpenApiDocument = {
           message: { type: "string" },
         },
       },
-      AuthorOption: {
+      UserOption: {
         type: "object",
         required: ["id", "username", "fullName"],
         properties: {
@@ -80,7 +80,7 @@ export const openApiDocument: OpenApiDocument = {
             properties: {
               id: { type: "string" },
               username: { type: "string" },
-              role: { type: "string", enum: ["estudiante", "profesor", "admin"] },
+              role: { type: "string", enum: ["coordinador", "aprobador", "admin_sistema"] },
             },
           },
           expiresAt: { type: "string" },
@@ -103,7 +103,7 @@ export const openApiDocument: OpenApiDocument = {
           email: { type: "string" },
           givenName: { type: "string" },
           familyName: { type: "string" },
-          role: { type: "string", enum: ["estudiante", "profesor", "admin"] },
+          role: { type: "string", enum: ["coordinador", "aprobador", "admin_sistema"] },
           createdAt: { type: "string" },
         },
       },
@@ -112,7 +112,7 @@ export const openApiDocument: OpenApiDocument = {
   paths: {
     "/api/v1/auth/register": {
       post: {
-        summary: "Registro público (solo crea estudiante)",
+        summary: "Registro público (solo crea coordinador)",
         requestBody: {
           required: true,
           content: {
@@ -201,18 +201,18 @@ export const openApiDocument: OpenApiDocument = {
         },
       },
     },
-    "/api/v1/users/authors": {
+    "/api/v1/users/coordinadores": {
       get: {
-        summary: "Opciones de usuario (sin email ni rol)",
+        summary: "Opciones de coordinadores (sin email ni rol)",
         security: sessionAuth(),
         responses: {
           200: {
-            description: "Lista de autores",
+            description: "Lista de coordinadores",
             content: {
               "application/json": {
                 schema: {
                   type: "array",
-                  items: { $ref: "#/components/schemas/AuthorOption" },
+                  items: { $ref: "#/components/schemas/UserOption" },
                 },
               },
             },
@@ -262,7 +262,7 @@ export const openApiDocument: OpenApiDocument = {
                 properties: {
                   role: {
                     type: "string",
-                    enum: ["estudiante", "profesor", "admin"],
+                    enum: ["coordinador", "aprobador", "admin_sistema"],
                   },
                 },
               },

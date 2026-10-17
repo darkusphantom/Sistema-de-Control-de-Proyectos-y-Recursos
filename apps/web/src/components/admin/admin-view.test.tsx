@@ -42,18 +42,18 @@ describe("AdminView", () => {
     );
   });
 
-  it("redirects authenticated non-admin users to /feed", () => {
+  it("redirects authenticated non-admin users to /dashboard", () => {
     state.status = "authenticated";
-    state.session = makeSession("estudiante");
+    state.session = makeSession("coordinador");
     render(<AdminView />);
 
-    expect(replace).toHaveBeenCalledWith("/feed");
+    expect(replace).toHaveBeenCalledWith("/dashboard");
     expect(screen.queryByRole("heading")).toBeNull();
   });
 
   it("renders the admin panel with the user management section", () => {
     state.status = "authenticated";
-    state.session = makeSession("admin");
+    state.session = makeSession("admin_sistema");
     render(<AdminView />);
 
     expect(
@@ -65,18 +65,18 @@ describe("AdminView", () => {
   it("announces a role change with a polite status message", async () => {
     const userEventSetup = userEvent.setup();
     state.status = "authenticated";
-    state.session = makeSession("admin");
+    state.session = makeSession("admin_sistema");
     render(<AdminView />);
 
     const select = screen.getByRole("combobox", {
       name: "Cambiar rol de @j.perez",
     });
-    await userEventSetup.selectOptions(select, "admin");
+    await userEventSetup.selectOptions(select, "admin_sistema");
     await userEventSetup.click(screen.getByRole("button", { name: "Confirmar" }));
 
     await waitFor(() => {
       expect(screen.getByRole("status")).toHaveTextContent(
-        'Rol de @j.perez actualizado a "admin".',
+        'Rol de @j.perez actualizado a "admin_sistema".',
       );
     });
   });

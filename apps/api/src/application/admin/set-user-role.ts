@@ -10,7 +10,8 @@ export type SetUserRoleDeps = {
  * Crea el caso de uso de asignación de rol por admin (R16).
  *
  * El cambio es inmediato para la siguiente petición (rol fresco, R14). Solo el
- * middleware `requireRole("admin")` garantiza que solo un admin llegue aquí.
+ * middleware `requireRole("admin_sistema")` garantiza que solo un admin del
+ * sistema llegue aquí.
  *
  * @param deps - Puerto de usuarios.
  * @returns Caso de uso `(id, role) → void`.

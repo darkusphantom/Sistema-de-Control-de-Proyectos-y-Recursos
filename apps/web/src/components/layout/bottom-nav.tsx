@@ -34,7 +34,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { session } = useSession();
 
-  const isAdmin = session?.user.role === "admin";
+  const isAdmin = session?.user.role === "admin_sistema";
   const username = session?.user.username ?? "";
 
   const destinations: NavDestination[] = [

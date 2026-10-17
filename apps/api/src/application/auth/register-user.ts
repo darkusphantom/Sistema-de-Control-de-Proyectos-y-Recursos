@@ -113,7 +113,7 @@ export async function ensureUniqueUsername(
  * o de `username` derivado produce el MISMO `409` genérico (anti-enumeración);
  * cualquier otro error (no conflicto) propaga al error handler (500 genérico
  * sin fuga, QA-1). El rol enviado en el body se ignora (el usuario nace
- * `estudiante`).
+ * `coordinador`).
  *
  * Anti-enumeración por timing (H5): cuando el email ya existe se ejecuta
  * también una derivación Scrypt señuelo antes de responder 409, de modo que

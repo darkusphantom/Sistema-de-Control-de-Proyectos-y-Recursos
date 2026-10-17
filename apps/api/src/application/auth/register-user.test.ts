@@ -16,7 +16,7 @@ const EXISTING_USER: User = {
   email: "maria@correo.com",
   givenName: "María",
   familyName: "Rivas",
-  role: "estudiante",
+  role: "coordinador",
   createdAt: "2026-01-01T00:00:00.000Z",
 };
 
@@ -36,7 +36,7 @@ const COMMAND = {
  */
 function makeUsersRepo(overrides: Partial<UserRepository> = {}): UserRepository {
   const defaults: UserRepository = {
-    listAuthors: async () => [],
+    listByRole: async () => [],
     findById: async (id) => (id === EXISTING_USER.id ? EXISTING_USER : null),
     findByUsername: async () => null,
     findByEmail: async () => null,

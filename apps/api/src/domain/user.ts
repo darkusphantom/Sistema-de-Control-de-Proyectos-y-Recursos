@@ -7,9 +7,9 @@
  * @module domain/user
  */
 
-import type { UserRole, User, AuthorOption } from "@redfacyt/shared";
+import type { UserRole, User, UserOption } from "@redfacyt/shared";
 
-export type { UserRole, User, AuthorOption };
+export type { UserRole, User, UserOption };
 
 /**
  * Puerto hexagonal para el acceso a datos de usuarios.
@@ -19,12 +19,13 @@ export type { UserRole, User, AuthorOption };
 
 export interface UserRepository {
   /**
-   * Devuelve los usuarios con al menos una publicación, ordenados por nombre
-   * completo con locale `"es"` para un orden estable entre sistemas.
+   * Devuelve los usuarios con el rol indicado, ordenados por nombre completo
+   * con locale `"es"` para un orden estable entre sistemas.
    *
-   * @returns Opciones de autor ordenadas por nombre completo.
+   * @param role - Rol a filtrar (pivot-project.md §7).
+   * @returns Opciones de usuario ordenadas por nombre completo.
    */
-  listAuthors(): Promise<AuthorOption[]>;
+  listByRole(role: UserRole): Promise<UserOption[]>;
 
   /**
    * Busca un usuario por su id.

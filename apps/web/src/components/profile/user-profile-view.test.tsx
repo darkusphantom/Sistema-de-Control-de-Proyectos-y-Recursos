@@ -51,7 +51,7 @@ function makeUser(overrides: Partial<User> = {}): User {
     email: "maria@correo.com",
     givenName: "María",
     familyName: "Rivas",
-    role: "estudiante",
+    role: "coordinador",
     createdAt: "2026-09-01T00:00:00Z",
     bio: "Docente y investigadora.",
     ...overrides,
@@ -155,16 +155,16 @@ describe("UserProfileView", () => {
 
   it("renders the role badge for each legacy role tone", () => {
     const { rerender } = render(
-      <UserProfileView user={makeUser({ role: "admin" })} isOwnProfile />,
+      <UserProfileView user={makeUser({ role: "admin_sistema" })} isOwnProfile />,
     );
-    expect(screen.getByText("admin")).toBeInTheDocument();
+    expect(screen.getByText("admin_sistema")).toBeInTheDocument();
 
-    rerender(<UserProfileView user={makeUser({ role: "profesor" })} isOwnProfile />);
-    expect(screen.getByText("profesor")).toBeInTheDocument();
+    rerender(<UserProfileView user={makeUser({ role: "aprobador" })} isOwnProfile />);
+    expect(screen.getByText("aprobador")).toBeInTheDocument();
 
     rerender(
-      <UserProfileView user={makeUser({ role: "estudiante" })} isOwnProfile />,
+      <UserProfileView user={makeUser({ role: "coordinador" })} isOwnProfile />,
     );
-    expect(screen.getByText("estudiante")).toBeInTheDocument();
+    expect(screen.getByText("coordinador")).toBeInTheDocument();
   });
 });

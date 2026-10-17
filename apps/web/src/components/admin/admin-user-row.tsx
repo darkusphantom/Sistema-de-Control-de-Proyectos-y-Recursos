@@ -34,9 +34,9 @@ export function AdminUserRow({ user, onChangeRole }: AdminUserRowProps) {
       <td className="px-4 py-3">
         <Badge
           tone={
-            user.role === "admin"
+            user.role === "admin_sistema"
               ? "warning"
-              : user.role === "profesor"
+              : user.role === "aprobador"
                 ? "category"
                 : "neutral"
           }
@@ -58,13 +58,13 @@ export function AdminUserRow({ user, onChangeRole }: AdminUserRowProps) {
             className="w-36 text-xs"
             aria-label={`Cambiar rol de @${user.username}`}
           >
-            <option value="estudiante">estudiante</option>
-            <option value="profesor">profesor</option>
-            <option value="admin">admin</option>
+            <option value="coordinador">coordinador</option>
+            <option value="aprobador">aprobador</option>
+            <option value="admin_sistema">admin_sistema</option>
           </SelectField>
           {!isRoleChangeAllowed && (
             <span className="text-[10px] text-danger mt-1">
-              Los administradores no pueden cambiar de rol.
+              Los administradores del sistema no pueden cambiar de rol.
             </span>
           )}
         </div>

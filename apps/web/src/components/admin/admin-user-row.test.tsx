@@ -11,7 +11,7 @@ describe("AdminUserRow", () => {
     email: "l.rodriguez@facyt.edu",
     givenName: "Luis",
     familyName: "Rodríguez",
-    role: "estudiante",
+    role: "coordinador",
     createdAt: "2026-09-02T10:00:00Z",
   };
 
@@ -21,47 +21,49 @@ describe("AdminUserRow", () => {
         <tbody>
           <AdminUserRow user={mockUser} onChangeRole={vi.fn()} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(screen.getByText("Luis Rodríguez")).toBeDefined();
     expect(screen.getByText("@l.rodriguez")).toBeDefined();
     expect(screen.queryByText("l.rodriguez@facyt.edu")).toBeNull();
-    expect(screen.getAllByText("estudiante")[0]).toBeDefined(); // Badge
+    expect(screen.getAllByText("coordinador")[0]).toBeDefined(); // Badge
   });
 
   it("allows role change for non-admin user", async () => {
     const userEventSetup = userEvent.setup();
     const handleChangeRole = vi.fn();
-    
+
     render(
       <table>
         <tbody>
           <AdminUserRow user={mockUser} onChangeRole={handleChangeRole} />
         </tbody>
-      </table>
+      </table>,
     );
 
     const select = screen.getByRole("combobox", { name: "Cambiar rol de @l.rodriguez" });
     expect(select.hasAttribute("disabled")).toBe(false);
 
-    await userEventSetup.selectOptions(select, "profesor");
-    expect(handleChangeRole).toHaveBeenCalledWith("u-1", "profesor");
+    await userEventSetup.selectOptions(select, "aprobador");
+    expect(handleChangeRole).toHaveBeenCalledWith("u-1", "aprobador");
   });
 
-  it("disables select when user is admin", () => {
-    const adminUser: User = { ...mockUser, role: "admin" };
-    
+  it("disables select when user is admin_sistema", () => {
+    const adminUser: User = { ...mockUser, role: "admin_sistema" };
+
     render(
       <table>
         <tbody>
           <AdminUserRow user={adminUser} onChangeRole={vi.fn()} />
         </tbody>
-      </table>
+      </table>,
     );
 
     const select = screen.getByRole("combobox", { name: "Cambiar rol de @l.rodriguez" });
     expect(select.hasAttribute("disabled")).toBe(true);
-    expect(screen.getByText("Los administradores no pueden cambiar de rol.")).toBeDefined();
+    expect(
+      screen.getByText("Los administradores del sistema no pueden cambiar de rol."),
+    ).toBeDefined();
   });
 });

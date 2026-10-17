@@ -150,7 +150,7 @@ export class MemoryUserStore {
   }
 
   /**
-   * Devuelve todos los usuarios (para `listAuthors` y recorridos del adaptador).
+   * Devuelve todos los usuarios (para `listByRole` y recorridos del adaptador).
    *
    * @returns Arreglo de usuarios.
    */

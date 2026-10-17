@@ -25,7 +25,7 @@ export function getProfile(deps: GetProfileDeps) {
     const user = await deps.users.findByUsername(username);
     if (!user) throw new NotFoundError();
     const isOwner = user.id === session.user.id;
-    const isAdmin = session.user.role === "admin";
+    const isAdmin = session.user.role === "admin_sistema";
     const profile = isOwner || isAdmin ? user : { ...user, email: "" };
     return { user: profile };
   };

@@ -1,7 +1,7 @@
 import type {
-  AuthorOption,
   User,
   UserRepository,
+  UserOption,
   UserRole,
 } from "../../../domain/user";
 import { MemoryUserStore } from "./user-store";
@@ -17,27 +17,26 @@ export class InMemoryUserRepository implements UserRepository {
   constructor(private readonly store: MemoryUserStore) {}
 
   /**
-   * Devuelve los usuarios registrados como opciones ligeras, ordenados por
-   * nombre completo con locale `"es"`. Solo `{ id, username, fullName }`:
-   * nunca email ni rol (R18).
+   * Devuelve los usuarios registrados con el rol indicado como opciones
+   * ligeras, ordenados por nombre completo con locale `"es"`. Solo
+   * `{ id, username, fullName }`: nunca email ni rol (R18).
    *
-   * Nota transitoria del pivot: hasta la reconversión a `listByRole` (fase 2
-   * del pivot), devuelve todos los usuarios del store.
+   * Complejidad: O(n) por el filtro + O(n log n) dominado por el orden.
    *
-   * Complejidad: O(n log n) dominado por el orden; el mapeo es O(n).
-   *
+   * @param role - Rol a filtrar.
    * @returns Opciones de usuario.
    */
-  async listAuthors(): Promise<AuthorOption[]> {
-    const authors: AuthorOption[] = this.store
+  async listByRole(role: UserRole): Promise<UserOption[]> {
+    const options: UserOption[] = this.store
       .allUsers()
+      .filter((user) => user.role === role)
       .map((user) => ({
         id: user.id,
         username: user.username,
         fullName: `${user.givenName} ${user.familyName}`,
       }));
-    authors.sort((a, b) => a.fullName.localeCompare(b.fullName, "es"));
-    return authors;
+    options.sort((a, b) => a.fullName.localeCompare(b.fullName, "es"));
+    return options;
   }
 
   /**

@@ -11,9 +11,9 @@ import { parseJsonBody, validationError } from "./helpers";
  * Registra las rutas de admin (api-structure.md §9.5):
  * `PATCH /admin/users/:id/role`.
  *
- * Matriz de enforcement (R16): solo `admin`, verificado EN SERVIDOR por
- * petición (`requireSession` + `requireRole("admin")`) con el rol fresco del
- * store (R14). Mutaciones con CSRF. Id inexistente → 404.
+ * Matriz de enforcement (R16): solo `admin_sistema`, verificado EN SERVIDOR
+ * por petición (`requireSession` + `requireRole("admin_sistema")`) con el rol
+ * fresco del store (R14). Mutaciones con CSRF. Id inexistente → 404.
  *
  * @param app  - App Hono.
  * @param deps - Dependencias inyectadas.
@@ -26,7 +26,7 @@ export function registerAdminRoutes(app: Hono, deps: RouteDeps): void {
   app.patch(
     "/api/v1/admin/users/:id/role",
     requireSession(auth, users),
-    requireRole("admin"),
+    requireRole("admin_sistema"),
     csrfMiddleware,
     async (c) => {
       const idParsed = idSchema.safeParse(c.req.param("id"));

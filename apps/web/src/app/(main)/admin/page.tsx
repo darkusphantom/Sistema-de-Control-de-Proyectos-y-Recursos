@@ -1,12 +1,12 @@
 import { AdminView } from "@/components/admin/admin-view";
 
 /**
- * Admin management page component for route `/admin`.
+ * Página de administración para la ruta `/admin`.
  *
- * Restricted to users with `admin` role. Non-admin users are automatically
- * redirected to `/feed`.
+ * Restringida a usuarios con rol `admin_sistema`. Los usuarios sin ese rol
+ * son redirigidos automáticamente a `/dashboard`.
  *
- * @returns The admin management dashboard view.
+ * @returns La vista del panel de administración.
  */
 export default function AdminPage() {
   return <AdminView />;

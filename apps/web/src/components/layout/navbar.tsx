@@ -41,7 +41,7 @@ export function Navbar() {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const isAdmin = session?.user.role === "admin";
+  const isAdmin = session?.user.role === "admin_sistema";
   const username = session?.user.username ?? "";
 
   // Close on click outside

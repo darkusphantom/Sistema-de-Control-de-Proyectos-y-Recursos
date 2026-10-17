@@ -47,7 +47,7 @@ function makeSession(role: Session["user"]["role"]): Session {
 
 beforeEach(() => {
   state.pathname = "/dashboard";
-  state.session = makeSession("estudiante");
+  state.session = makeSession("coordinador");
 });
 
 describe("BottomNav", () => {
@@ -66,7 +66,7 @@ describe("BottomNav", () => {
   });
 
   it("adds the Admin destination for admin users", () => {
-    state.session = makeSession("admin");
+    state.session = makeSession("admin_sistema");
     render(<BottomNav />);
 
     expect(screen.getByRole("link", { name: /Admin/ })).toHaveAttribute(

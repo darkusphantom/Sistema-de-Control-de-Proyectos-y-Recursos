@@ -152,7 +152,7 @@ describe("LoginSchema", () => {
 
 describe("sessionSchema", () => {
   const validSession = {
-    user: { id: "u-1", username: "m.rivas", role: "estudiante" },
+    user: { id: "u-1", username: "m.rivas", role: "coordinador" },
     expiresAt: "2099-01-01T00:00:00Z",
   };
 
@@ -180,7 +180,7 @@ describe("userSchema", () => {
     email: "maria@correo.com",
     givenName: "María",
     familyName: "Rivas",
-    role: "estudiante",
+    role: "coordinador",
     createdAt: "2026-09-01T00:00:00Z",
   };
 
@@ -202,9 +202,9 @@ describe("userSchema", () => {
 
 describe("SetUserRoleSchema", () => {
   it("accepts the three roles and rejects others", () => {
-    expect(SetUserRoleSchema.safeParse({ role: "estudiante" }).success).toBe(true);
-    expect(SetUserRoleSchema.safeParse({ role: "profesor" }).success).toBe(true);
-    expect(SetUserRoleSchema.safeParse({ role: "admin" }).success).toBe(true);
+    expect(SetUserRoleSchema.safeParse({ role: "coordinador" }).success).toBe(true);
+    expect(SetUserRoleSchema.safeParse({ role: "aprobador" }).success).toBe(true);
+    expect(SetUserRoleSchema.safeParse({ role: "admin_sistema" }).success).toBe(true);
     expect(SetUserRoleSchema.safeParse({ role: "superuser" }).success).toBe(false);
   });
 });

@@ -11,8 +11,8 @@ describe("ConfirmRoleDialog", () => {
         onClose={vi.fn()}
         onConfirm={vi.fn()}
         username="l.rodriguez"
-        currentRole="estudiante"
-        newRole="profesor"
+        currentRole="coordinador"
+        newRole="aprobador"
       />
     );
 
@@ -21,7 +21,7 @@ describe("ConfirmRoleDialog", () => {
       screen.getByRole("heading", { name: "Confirmar cambio de rol" })
     ).toBeDefined();
     expect(
-      screen.getByText('¿Cambiar el rol de @l.rodriguez de "estudiante" a "profesor"?')
+      screen.getByText('¿Cambiar el rol de @l.rodriguez de "coordinador" a "aprobador"?')
     ).toBeDefined();
   });
 
@@ -34,8 +34,8 @@ describe("ConfirmRoleDialog", () => {
         onClose={handleClose}
         onConfirm={vi.fn()}
         username="test"
-        currentRole="estudiante"
-        newRole="profesor"
+        currentRole="coordinador"
+        newRole="aprobador"
       />
     );
 
@@ -53,8 +53,8 @@ describe("ConfirmRoleDialog", () => {
         onClose={vi.fn()}
         onConfirm={handleConfirm}
         username="test"
-        currentRole="estudiante"
-        newRole="profesor"
+        currentRole="coordinador"
+        newRole="aprobador"
       />
     );
 
@@ -70,8 +70,8 @@ describe("ConfirmRoleDialog", () => {
         onClose={vi.fn()}
         onConfirm={vi.fn()}
         username="test"
-        currentRole="estudiante"
-        newRole="profesor"
+        currentRole="coordinador"
+        newRole="aprobador"
         isPending={true}
       />
     );

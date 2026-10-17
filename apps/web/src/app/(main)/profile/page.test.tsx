@@ -36,7 +36,7 @@ describe("ProfileRedirectPage (/profile)", () => {
   it("redirects authenticated users to their own profile", async () => {
     state.status = "authenticated";
     state.session = {
-      user: { id: "u-3", username: "m.rivas", role: "estudiante" },
+      user: { id: "u-3", username: "m.rivas", role: "coordinador" },
       expiresAt: "2099-01-01T00:00:00Z",
     };
     render(<ProfileRedirectPage />);

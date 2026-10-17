@@ -22,7 +22,7 @@ const originalUsers = mockUsers.map((user) => ({ ...user }));
 /** Siembra una sesión válida en `localStorage` (lee el StaticAuthGateway). */
 function seedSession(): void {
   const session: Session = {
-    user: { id: "u-3", username: "m.rivas", role: "estudiante" },
+    user: { id: "u-3", username: "m.rivas", role: "coordinador" },
     expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   };
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));

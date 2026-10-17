@@ -7,11 +7,12 @@ import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
 const gateway = new StaticAuthGateway();
 
 /**
- * Client-side guard for public auth pages.
- * If a session exists, it replaces the history entry and redirects to /feed.
- * 
- * Note: Once the backend is implemented, this should be handled by Middleware 
- * to avoid client-side redirect flashes.
+ * Guard de cliente para las páginas públicas de auth.
+ * Si ya existe una sesión, reemplaza la entrada del historial y redirige a
+ * /dashboard.
+ *
+ * Nota: cuando el backend esté conectado, esta guarda debe resolverse en
+ * middleware para evitar el parpadeo del redirect en cliente.
  */
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -20,7 +21,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     gateway.getSession().then((session) => {
       if (session) {
-        router.replace("/feed");
+        router.replace("/dashboard");
       } else {
         setIsChecking(false);
       }

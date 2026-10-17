@@ -66,7 +66,7 @@ describe("RegisterForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith("/feed");
+      expect(mockReplace).toHaveBeenCalledWith("/dashboard");
     });
   });
 

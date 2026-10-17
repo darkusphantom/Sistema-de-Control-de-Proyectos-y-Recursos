@@ -16,7 +16,7 @@ describe("ProfileForm", () => {
     email: "j@correo.com",
     givenName: "Juan",
     familyName: "Pérez",
-    role: "estudiante",
+    role: "coordinador",
     createdAt: "2026",
     bio: "Bio original",
   };

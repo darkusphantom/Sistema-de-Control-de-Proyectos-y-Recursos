@@ -1,7 +1,12 @@
 /**
  * Roles posibles de un usuario de la plataforma Red FaCyT.
+ *
+ * Tras el pivot a Control de Proyectos (pivot-project.md §7): el registro
+ * público solo crea `coordinador`; `aprobador` gestiona inventario y
+ * aprobaciones; `admin_sistema` tiene acceso total (usuarios, catálogos,
+ * auditoría).
  */
-export type UserRole = "estudiante" | "profesor" | "admin";
+export type UserRole = "coordinador" | "aprobador" | "admin_sistema";
 
 /**
  * Usuario registrado en el sistema.
@@ -25,9 +30,9 @@ export type User = {
 };
 
 /**
- * Datos ligeros de autor para filtros y tarjetas.
+ * Datos ligeros de usuario para listados y selectores (sin email ni rol).
  */
-export type AuthorOption = {
+export type UserOption = {
   id: string;
   username: string;
   /** Nombre completo para mostrar, p. ej. "María Rivas". */

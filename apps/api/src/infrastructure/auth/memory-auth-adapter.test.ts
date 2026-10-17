@@ -21,7 +21,7 @@ function buildAdapter() {
           type: "string",
           required: true,
           input: false,
-          defaultValue: "estudiante",
+          defaultValue: "coordinador",
         },
         numeric: { type: "number", required: false, input: true },
         team: { type: "string", required: false, input: true },
@@ -43,7 +43,7 @@ function userData(overrides: Record<string, unknown> = {}) {
     username: "a.rivas",
     givenName: "Ana",
     familyName: "Rivas",
-    role: "estudiante",
+    role: "coordinador",
     ...overrides,
   };
 }
@@ -52,7 +52,7 @@ describe("memoryAdapter (Better Auth DBAdapter)", () => {
   it("creates a user and maintains username/email indices", async () => {
     const { store, db } = buildAdapter();
     const created = await db.create({ model: "user", data: userData() });
-    expect(created).toMatchObject({ username: "a.rivas", role: "estudiante" });
+    expect(created).toMatchObject({ username: "a.rivas", role: "coordinador" });
     const id = String((created as { id: string }).id);
     expect(store.userById(id)?.email).toBe("ana@correo.com");
     expect(store.userByUsername("a.rivas")?.id).toBe(id);
@@ -141,7 +141,7 @@ describe("memoryAdapter (Better Auth DBAdapter)", () => {
     const andResult = await db.findMany({
       model: "user",
       where: [
-        { field: "role", value: "estudiante" },
+        { field: "role", value: "coordinador" },
         { field: "team", value: "red" },
       ],
     });
@@ -182,17 +182,17 @@ describe("memoryAdapter (Better Auth DBAdapter)", () => {
     const updated = await db.update({
       model: "user",
       where: [{ field: "username", value: "a" }],
-      update: { role: "admin" },
+      update: { role: "admin_sistema" },
     });
-    expect(updated).toMatchObject({ username: "a", role: "admin" });
+    expect(updated).toMatchObject({ username: "a", role: "admin_sistema" });
     expect(
-      await db.update({ model: "user", where: [{ field: "username", value: "none" }], update: { role: "admin" } }),
+      await db.update({ model: "user", where: [{ field: "username", value: "none" }], update: { role: "admin_sistema" } }),
     ).toBeNull();
 
     const count = await db.updateMany({
       model: "user",
-      where: [{ field: "role", value: "estudiante" }],
-      update: { role: "profesor" },
+      where: [{ field: "role", value: "coordinador" }],
+      update: { role: "aprobador" },
     });
     expect(count).toBe(1);
   });

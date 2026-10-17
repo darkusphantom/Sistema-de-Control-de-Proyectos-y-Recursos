@@ -6,7 +6,7 @@ describe("SelectField", () => {
   it("associates a visible label with the select via htmlFor", () => {
     render(
       <SelectField label="Rol">
-        <option value="estudiante">Estudiante</option>
+        <option value="coordinador">Coordinador</option>
       </SelectField>,
     );
 
@@ -17,7 +17,7 @@ describe("SelectField", () => {
   it("shows the hint and wires it through aria-describedby", () => {
     render(
       <SelectField label="Rol" hint="Selecciona un rol.">
-        <option value="estudiante">Estudiante</option>
+        <option value="coordinador">Coordinador</option>
       </SelectField>,
     );
 
@@ -30,7 +30,7 @@ describe("SelectField", () => {
   it("replaces the hint with an error, sets aria-invalid and role=alert", () => {
     render(
       <SelectField label="Rol" hint="Selecciona un rol." error="Rol inválido.">
-        <option value="estudiante">Estudiante</option>
+        <option value="coordinador">Coordinador</option>
       </SelectField>,
     );
 
@@ -43,7 +43,7 @@ describe("SelectField", () => {
   it("passes through native select attributes such as disabled", () => {
     render(
       <SelectField label="Rol" disabled>
-        <option value="estudiante">Estudiante</option>
+        <option value="coordinador">Coordinador</option>
       </SelectField>,
     );
 

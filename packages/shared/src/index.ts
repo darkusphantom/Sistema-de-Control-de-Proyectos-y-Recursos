@@ -13,7 +13,7 @@
 export type {
   UserRole,
   User,
-  AuthorOption,
+  UserOption,
 } from "./types/user";
 
 export type { Session } from "./types/session";
@@ -45,5 +45,5 @@ export {
   avatarDataUrlSchema,
   UpdateProfileSchema,
   ChangePasswordSchema,
-  authorOptionSchema,
+  userOptionSchema,
 } from "./schemas/user";

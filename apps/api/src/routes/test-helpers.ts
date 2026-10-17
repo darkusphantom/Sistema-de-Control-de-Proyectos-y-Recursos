@@ -146,15 +146,18 @@ export async function registerUser(
 }
 
 /**
- * Convierte a un usuario del store en admin (para tests de enforcement).
+ * Convierte a un usuario del store en el rol indicado (para tests de
+ * enforcement).
  *
  * @param store    - Store compartido.
  * @param username - Username del usuario.
+ * @param role     - Rol a asignar (p. ej. `admin_sistema`).
  */
-export function promoteToAdmin(
+export function promoteToRole(
   store: ReturnType<typeof buildApp>["store"],
   username: string,
+  role: "coordinador" | "aprobador" | "admin_sistema",
 ): void {
   const stored = store.userByUsername(username);
-  if (stored) store.saveUser({ ...stored, role: "admin" });
+  if (stored) store.saveUser({ ...stored, role });
 }

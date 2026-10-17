@@ -26,14 +26,14 @@ describe("AuthGuard", () => {
   });
 
   it("redirects to /feed and hides children if session exists", async () => {
-    const mockSession = { user: { id: "1", username: "test", role: "estudiante" }, expiresAt: new Date(Date.now() + 10000).toISOString() };
+    const mockSession = { user: { id: "1", username: "test", role: "coordinador" }, expiresAt: new Date(Date.now() + 10000).toISOString() };
     localStorage.setItem("facy:session", JSON.stringify(mockSession));
     
 
     render(<AuthGuard><div data-testid="content" /></AuthGuard>);
     
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith("/feed");
+      expect(mockReplace).toHaveBeenCalledWith("/dashboard");
       expect(screen.queryByTestId("content")).not.toBeInTheDocument();
     });
   });

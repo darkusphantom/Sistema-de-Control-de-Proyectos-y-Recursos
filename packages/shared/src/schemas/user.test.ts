@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { authorOptionSchema } from "./user";
+import { userOptionSchema } from "./user";
 
-describe("authorOptionSchema", () => {
+describe("userOptionSchema", () => {
   it("accepts a light user option (id, username, fullName)", () => {
     expect(
-      authorOptionSchema.safeParse({
+      userOptionSchema.safeParse({
         id: "u-1",
         username: "m.rivas",
         fullName: "María Rivas",
@@ -14,10 +14,10 @@ describe("authorOptionSchema", () => {
 
   it("rejects missing fields and extra properties (strict)", () => {
     expect(
-      authorOptionSchema.safeParse({ id: "u-1", username: "m.rivas" }).success,
+      userOptionSchema.safeParse({ id: "u-1", username: "m.rivas" }).success,
     ).toBe(false);
     expect(
-      authorOptionSchema.safeParse({
+      userOptionSchema.safeParse({
         id: "u-1",
         username: "m.rivas",
         fullName: "María Rivas",

@@ -4,15 +4,15 @@ import { canChangeRole } from "./moderation";
 describe("moderation domain logic", () => {
   describe("canChangeRole", () => {
     it("returns false for 'admin' role", () => {
-      expect(canChangeRole("admin")).toBe(false);
+      expect(canChangeRole("admin_sistema")).toBe(false);
     });
 
-    it("returns true for 'estudiante' role", () => {
-      expect(canChangeRole("estudiante")).toBe(true);
+    it("returns true for 'coordinador' role", () => {
+      expect(canChangeRole("coordinador")).toBe(true);
     });
 
-    it("returns true for 'profesor' role", () => {
-      expect(canChangeRole("profesor")).toBe(true);
+    it("returns true for 'aprobador' role", () => {
+      expect(canChangeRole("aprobador")).toBe(true);
     });
   });
 });

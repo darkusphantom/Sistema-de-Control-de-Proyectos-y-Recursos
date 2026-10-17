@@ -26,7 +26,7 @@ vi.mock("@/lib/session/session-provider", () => ({
   SessionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useSession: () => ({
     status: "authenticated",
-    session: { user: { id: "u-1", username: "admin", role: "admin" }, expiresAt: "2099-01-01T00:00:00Z" },
+    session: { user: { id: "u-1", username: "admin", role: "admin_sistema" }, expiresAt: "2099-01-01T00:00:00Z" },
     signOut: vi.fn(),
   }),
 }));

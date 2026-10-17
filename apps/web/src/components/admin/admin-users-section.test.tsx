@@ -12,7 +12,7 @@ describe("AdminUsersSection", () => {
       email: "admin@facyt.edu",
       givenName: "Admin",
       familyName: "Sistema",
-      role: "admin",
+      role: "admin_sistema",
       createdAt: "2026-09-01T10:00:00Z",
     },
     {
@@ -21,7 +21,7 @@ describe("AdminUsersSection", () => {
       email: "l.rodriguez@facyt.edu",
       givenName: "Luis",
       familyName: "Rodríguez",
-      role: "estudiante",
+      role: "coordinador",
       createdAt: "2026-09-02T10:00:00Z",
     },
   ];
@@ -60,19 +60,19 @@ describe("AdminUsersSection", () => {
     const handleChangeRole = vi.fn();
     render(<AdminUsersSection users={mockUsers} onChangeRole={handleChangeRole} />);
 
-    // Change Luis's role to profesor
+    // Change Luis's role to aprobador
     const select = screen.getByRole("combobox", { name: "Cambiar rol de @l.rodriguez" });
-    await userEventSetup.selectOptions(select, "profesor");
+    await userEventSetup.selectOptions(select, "aprobador");
 
     // Dialog should open
     expect(screen.getByRole("dialog")).toBeDefined();
-    expect(screen.getByText('¿Cambiar el rol de @l.rodriguez de "estudiante" a "profesor"?')).toBeDefined();
+    expect(screen.getByText('¿Cambiar el rol de @l.rodriguez de "coordinador" a "aprobador"?')).toBeDefined();
 
     // Confirm
     const confirmButton = screen.getByRole("button", { name: "Confirmar" });
     await userEventSetup.click(confirmButton);
 
-    expect(handleChangeRole).toHaveBeenCalledWith("u-2", "profesor");
+    expect(handleChangeRole).toHaveBeenCalledWith("u-2", "aprobador");
     expect(screen.queryByRole("dialog")).toBeNull(); // Dialog closes
   });
 
@@ -81,9 +81,9 @@ describe("AdminUsersSection", () => {
     const handleChangeRole = vi.fn();
     render(<AdminUsersSection users={mockUsers} onChangeRole={handleChangeRole} />);
 
-    // Change Luis's role to profesor
+    // Change Luis's role to aprobador
     const select = screen.getByRole("combobox", { name: "Cambiar rol de @l.rodriguez" });
-    await userEventSetup.selectOptions(select, "profesor");
+    await userEventSetup.selectOptions(select, "aprobador");
 
     // Cancel
     const cancelButton = screen.getByRole("button", { name: "Cancelar" });

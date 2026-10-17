@@ -28,9 +28,9 @@ export function UserProfileView({ user, isOwnProfile }: UserProfileViewProps) {
   };
 
   const roleTone =
-    user.role === "admin"
+    user.role === "admin_sistema"
       ? "warning"
-      : user.role === "profesor"
+      : user.role === "aprobador"
         ? "category"
         : "neutral";
 

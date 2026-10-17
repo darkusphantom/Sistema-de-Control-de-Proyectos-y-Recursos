@@ -42,7 +42,7 @@ export function LoginForm() {
     const result = await gateway.signIn(formData);
 
     if (result.success) {
-      router.replace("/feed");
+      router.replace("/dashboard");
     } else {
       setGlobalError(result.error);
       setErrors(result.fieldErrors || {});

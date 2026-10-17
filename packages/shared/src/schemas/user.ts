@@ -26,8 +26,8 @@ export {
 
 import { z } from "zod";
 
-/** `AuthorOption` wire: usuario ligero para listados (sin email ni rol). */
-export const authorOptionSchema = z
+/** `UserOption` wire: usuario ligero para listados (sin email ni rol). */
+export const userOptionSchema = z
   .object({
     id: z.string(),
     username: z.string(),

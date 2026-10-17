@@ -50,7 +50,7 @@ function makeSession(role: Session["user"]["role"]): Session {
 
 beforeEach(() => {
   state.pathname = "/dashboard";
-  state.session = makeSession("estudiante");
+  state.session = makeSession("coordinador");
   state.signOut.mockClear();
 });
 
@@ -77,7 +77,7 @@ describe("Navbar", () => {
   });
 
   it("shows the admin link for admin users", () => {
-    state.session = makeSession("admin");
+    state.session = makeSession("admin_sistema");
     render(<Navbar />);
     expect(screen.getByRole("link", { name: "Administración" })).toHaveAttribute(
       "href",

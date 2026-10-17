@@ -45,7 +45,7 @@ describe("Auth routes · register", () => {
 
     const body = await jsonOf(response);
     expect(sessionSchema.safeParse(body).success).toBe(true);
-    expect(body.user).toMatchObject({ role: "estudiante" });
+    expect(body.user).toMatchObject({ role: "coordinador" });
     expect(body.user).not.toHaveProperty("email");
 
     const setCookies = response.headers.getSetCookie();
@@ -103,11 +103,11 @@ describe("Auth routes · register", () => {
     expect(secondBody.user).toMatchObject({ username: "maria.rivas1" });
   });
 
-  it("ignores a role sent in the register body (user is always estudiante)", async () => {
+  it("ignores a role sent in the register body (user is always coordinador)", async () => {
     const { app, store } = buildApp();
     const { response, jar } = await registerWithCsrf(app, {
       ...REGISTER_BODY,
-      role: "admin",
+      role: "admin_sistema",
     });
     expect(response.status).toBe(201);
 
@@ -115,11 +115,11 @@ describe("Auth routes · register", () => {
       headers: { cookie: jar.header() },
     });
     expect(await jsonOf(session)).toMatchObject({
-      user: { role: "estudiante" },
+      user: { role: "coordinador" },
     });
 
     const stored = store.userByEmail("maria@correo.com");
-    expect(stored?.role).toBe("estudiante");
+    expect(stored?.role).toBe("coordinador");
   });
 
   it("returns 429 after N+1 registrations from the same IP", async () => {
@@ -165,7 +165,7 @@ describe("Auth routes · login", () => {
     expect(response.status).toBe(200);
     const body = await jsonOf(response);
     expect(sessionSchema.safeParse(body).success).toBe(true);
-    expect(body.user).toMatchObject({ username: "maria.rivas", role: "estudiante" });
+    expect(body.user).toMatchObject({ username: "maria.rivas", role: "coordinador" });
     const jar = new CookieJar();
     jar.capture(response);
     expect(jar.get("better-auth.session_token")).toBeTruthy();
@@ -242,7 +242,7 @@ describe("Auth routes · session and logout", () => {
     });
     expect(withCookie.status).toBe(200);
     expect(await jsonOf(withCookie)).toMatchObject({
-      user: { username: "maria.rivas", role: "estudiante" },
+      user: { username: "maria.rivas", role: "coordinador" },
     });
   });
 

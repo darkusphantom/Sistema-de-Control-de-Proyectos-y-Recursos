@@ -17,7 +17,7 @@ vi.mock("next/navigation", () => ({
  */
 function makeSession(): Session {
   return {
-    user: { id: "u-1", username: "m.rivas", role: "estudiante" },
+    user: { id: "u-1", username: "m.rivas", role: "coordinador" },
     expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
   };
 }
@@ -87,7 +87,7 @@ describe("SessionProvider", () => {
 
   it("treats an expired session as anonymous and clears the stored key", async () => {
     const expired: Session = {
-      user: { id: "u-1", username: "m.rivas", role: "estudiante" },
+      user: { id: "u-1", username: "m.rivas", role: "coordinador" },
       expiresAt: new Date(Date.now() - 1000).toISOString(),
     };
     localStorage.setItem(SESSION_KEY, JSON.stringify(expired));

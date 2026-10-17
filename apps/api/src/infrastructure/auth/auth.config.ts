@@ -15,8 +15,8 @@ const SESSION_UPDATE_AGE_SECONDS = 60 * 60 * 8;
  *
  * Sesiones con expiración 24 h y renovación deslizante cada 8 h; cookies
  * `httpOnly` + `SameSite=Lax` + `Secure` (producción) + `Path=/`. El rol vive
- * en `additionalFields` con `input: false` y `defaultValue: "estudiante"`: el
- * registro público solo crea estudiantes (R12).
+ * en `additionalFields` con `input: false` y `defaultValue: "coordinador"`: el
+ * registro público solo crea coordinadores (R12; pivot-project.md §7).
  *
  * Desvíos registrados contra Better Auth v1.7.7 (la versión instalada):
  * - **Sesiones de BD, NO stateless JWT (hallazgo H4)**: se confirmó en el
@@ -72,7 +72,7 @@ export function createAuth(env: Env, store: MemoryUserStore) {
           type: "string",
           input: false,
           required: true,
-          defaultValue: "estudiante",
+          defaultValue: "coordinador",
         },
       },
     },

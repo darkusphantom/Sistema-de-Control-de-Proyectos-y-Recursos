@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { authorOptionSchema, userSchema } from "../domain/validation";
-import { buildApp, jsonOf, promoteToAdmin, registerUser } from "./test-helpers";
+import { userOptionSchema, userSchema } from "../domain/validation";
+import { buildApp, jsonOf, promoteToRole, registerUser } from "./test-helpers";
 
 const ANA = { givenName: "Ana", familyName: "Rivas", email: "ana@correo.com", password: "secreto123" };
 const BRUNO = { givenName: "Bruno", familyName: "Gomez", email: "bruno@correo.com", password: "secreto123" };
 
-describe("Users routes · GET /api/v1/users/authors", () => {
+describe("Users routes · GET /api/v1/users/coordinadores", () => {
   it("requires a session", async () => {
     const { app } = buildApp();
-    expect((await app.request("/api/v1/users/authors")).status).toBe(401);
+    expect((await app.request("/api/v1/users/coordinadores")).status).toBe(401);
   });
 
-  it("returns user options without email or role", async () => {
+  it("lists registered coordinadores without email or role", async () => {
     const { app, store } = buildApp();
     const anaJar = await registerUser(app, ANA);
     await registerUser(app, BRUNO);
     const anaId = store.userByUsername("ana.rivas")?.id ?? "u-a";
-    const response = await app.request("/api/v1/users/authors", {
+    const response = await app.request("/api/v1/users/coordinadores", {
       headers: { cookie: anaJar.header() },
     });
     expect(response.status).toBe(200);
@@ -25,8 +25,9 @@ describe("Users routes · GET /api/v1/users/authors", () => {
       username: string;
       fullName: string;
     }>;
+    // El registro público solo crea coordinadores (R12): ambos califican.
     expect(body).toHaveLength(2);
-    expect(authorOptionSchema.safeParse(body[0]).success).toBe(true);
+    expect(userOptionSchema.safeParse(body[0]).success).toBe(true);
     expect(body).toContainEqual({
       id: anaId,
       username: "ana.rivas",
@@ -34,6 +35,20 @@ describe("Users routes · GET /api/v1/users/authors", () => {
     });
     expect(JSON.stringify(body)).not.toContain("email");
     expect(JSON.stringify(body)).not.toContain("role");
+  });
+
+  it("excludes users with another role", async () => {
+    const { app, store } = buildApp();
+    const anaJar = await registerUser(app, ANA);
+    await registerUser(app, BRUNO);
+    promoteToRole(store, "bruno.gomez", "aprobador");
+
+    const response = await app.request("/api/v1/users/coordinadores", {
+      headers: { cookie: anaJar.header() },
+    });
+    const body = (await response.json()) as Array<{ username: string }>;
+    expect(body).toHaveLength(1);
+    expect(body[0]?.username).toBe("ana.rivas");
   });
 });
 
@@ -82,7 +97,7 @@ describe("Users routes · GET /api/v1/users/:username", () => {
     expect(userSchema.safeParse(ownBody.user).success).toBe(true);
     expect(ownBody.user).toMatchObject({ email: "ana@correo.com" });
 
-    promoteToAdmin(store, "ana.rivas");
+    promoteToRole(store, "ana.rivas", "admin_sistema");
     const asAdmin = await app.request("/api/v1/users/bruno.gomez", {
       headers: { cookie: anaJar.header() },
     });

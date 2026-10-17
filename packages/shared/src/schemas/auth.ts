@@ -59,7 +59,7 @@ export const sessionSchema = z
     user: z.object({
       id: z.string(),
       username: z.string(),
-      role: z.enum(["estudiante", "profesor", "admin"] as const),
+      role: z.enum(["coordinador", "aprobador", "admin_sistema"] as const),
     }),
     expiresAt: z.string(),
   })
@@ -73,14 +73,14 @@ export const userSchema = z
     email: z.string(),
     givenName: z.string(),
     familyName: z.string(),
-    role: z.enum(["estudiante", "profesor", "admin"] as const),
+    role: z.enum(["coordinador", "aprobador", "admin_sistema"] as const),
     createdAt: z.string(),
     bio: z.string().nullable().optional(),
     avatarUrl: z.string().nullable().optional(),
   })
   .strict();
 
-/** Cuerpo de asignación de rol por admin. */
+/** Cuerpo de asignación de rol por admin del sistema. */
 export const SetUserRoleSchema = z.object({
-  role: z.enum(["estudiante", "profesor", "admin"] as const),
+  role: z.enum(["coordinador", "aprobador", "admin_sistema"] as const),
 });

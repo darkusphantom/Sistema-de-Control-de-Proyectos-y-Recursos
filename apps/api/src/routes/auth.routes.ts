@@ -75,7 +75,7 @@ function recordLoginFailure(
  * `auth.api.*` y ya llevan rate limit + CSRF (doble envío) + zod. La cookie
  * CSRF la emite el middleware global `ensureCsrfToken` montado en `createApp`.
  *
- * El registro solo crea `estudiante`; el `role` del body se ignora (R12).
+ * El registro solo crea `coordinador`; el `role` del body se ignora (R12).
  *
  * @param app  - App Hono.
  * @param deps - Dependencias inyectadas.

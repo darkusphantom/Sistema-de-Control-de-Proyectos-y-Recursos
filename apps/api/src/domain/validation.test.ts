@@ -87,13 +87,15 @@ describe("validation schemas", () => {
 
   describe("SetUserRoleSchema", () => {
     it("accepts the three roles and rejects others", () => {
-      expect(SetUserRoleSchema.safeParse({ role: "estudiante" }).success).toBe(
+      expect(SetUserRoleSchema.safeParse({ role: "coordinador" }).success).toBe(
         true,
       );
-      expect(SetUserRoleSchema.safeParse({ role: "profesor" }).success).toBe(
+      expect(SetUserRoleSchema.safeParse({ role: "aprobador" }).success).toBe(
         true,
       );
-      expect(SetUserRoleSchema.safeParse({ role: "admin" }).success).toBe(true);
+      expect(SetUserRoleSchema.safeParse({ role: "admin_sistema" }).success).toBe(
+        true,
+      );
       expect(SetUserRoleSchema.safeParse({ role: "superuser" }).success).toBe(
         false,
       );

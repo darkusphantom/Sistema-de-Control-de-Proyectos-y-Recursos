@@ -56,7 +56,7 @@ describe("LoginForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Iniciar sesión" }));
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith("/feed");
+      expect(mockReplace).toHaveBeenCalledWith("/dashboard");
     });
   });
 

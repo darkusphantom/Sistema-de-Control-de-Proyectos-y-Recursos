@@ -41,12 +41,13 @@ export type SessionProviderProps = {
  * Resolves the active session from `localStorage` and gates authenticated
  * routes in the `(main)` group.
  *
- * Behaviour (`docs/design/wireframes_feed.md` §2.4):
- * - While resolving (`status === "loading"`): renders an `aria-busy` container
- *   instead of `children` to prevent the feed from flashing before a redirect.
- * - `status === "anonymous"`: calls `router.replace("/login")` so `/feed` does
- *   not appear in browser history.
- * - `status === "authenticated"`: renders `children` normally.
+ * Comportamiento (`docs/design/wireframes_feed.md` §2.4):
+ * - Mientras resuelve (`status === "loading"`): renderiza un contenedor
+ *   `aria-busy` en vez de `children` para evitar el flash del feed antes del
+ *   redirect.
+ * - `status === "anonymous"`: llama `router.replace("/login")` para que
+ *   `/dashboard` no aparezca en el historial del navegador.
+ * - `status === "authenticated"`: renderiza `children` con normalidad.
  *
  * The session lives outside React state (in `localStorage`), so this component
  * follows the same external-store pattern as `theme.ts`: a single `useEffect`

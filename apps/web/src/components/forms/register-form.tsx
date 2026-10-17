@@ -48,7 +48,7 @@ export function RegisterForm() {
     const result = await gateway.signUp(formData);
 
     if (result.success) {
-      router.replace("/feed");
+      router.replace("/dashboard");
     } else {
       setGlobalError(result.error);
       setErrors(result.fieldErrors || {});

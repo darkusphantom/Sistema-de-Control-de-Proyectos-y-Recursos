@@ -21,5 +21,5 @@ export {
   userSchema,
   SetUserRoleSchema,
   // Esquemas de usuario
-  authorOptionSchema,
+  userOptionSchema,
 } from "@redfacyt/shared";

@@ -82,14 +82,14 @@ describe("StaticAuthGateway", () => {
     });
 
     it("returns session if valid", async () => {
-      const mockSession = { user: { id: "1", username: "test", role: "estudiante" }, expiresAt: new Date(Date.now() + 10000).toISOString() };
+      const mockSession = { user: { id: "1", username: "test", role: "coordinador" }, expiresAt: new Date(Date.now() + 10000).toISOString() };
       localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));
       const session = await gateway.getSession();
       expect(session?.user.username).toBe("test");
     });
 
     it("returns null and clears if expired", async () => {
-      const mockSession = { user: { id: "1", username: "test", role: "estudiante" }, expiresAt: new Date(Date.now() - 10000).toISOString() };
+      const mockSession = { user: { id: "1", username: "test", role: "coordinador" }, expiresAt: new Date(Date.now() - 10000).toISOString() };
       localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));
       const session = await gateway.getSession();
       expect(session).toBeNull();
@@ -108,7 +108,7 @@ describe("StaticAuthGateway", () => {
   describe("changePassword", () => {
     it("simulates success when there is an active session", async () => {
       const mockSession = {
-        user: { id: "1", username: "test", role: "estudiante" },
+        user: { id: "1", username: "test", role: "coordinador" },
         expiresAt: new Date(Date.now() + 10000).toISOString(),
       };
       localStorage.setItem(SESSION_KEY, JSON.stringify(mockSession));

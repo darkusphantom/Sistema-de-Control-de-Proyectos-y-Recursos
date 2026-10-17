@@ -53,7 +53,7 @@ export class StaticAuthGateway implements AuthGateway {
       email,
       givenName,
       familyName,
-      role: "estudiante" as const,
+      role: "coordinador" as const,
       createdAt: new Date().toISOString(),
     };
 

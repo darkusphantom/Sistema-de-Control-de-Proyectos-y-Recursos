@@ -12,7 +12,7 @@ export type {
   UserRole,
   User,
   Session,
-  AuthorOption,
+  UserOption,
 } from "@redfacyt/shared";
 
 /**

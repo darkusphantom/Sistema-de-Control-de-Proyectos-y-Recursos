@@ -18,7 +18,7 @@ function makeStoredUser(overrides: Partial<StoredUser> = {}): StoredUser {
     username: "a.rivas",
     givenName: "Ana",
     familyName: "Rivas",
-    role: "estudiante",
+    role: "coordinador",
     ...overrides,
   };
 }
@@ -36,7 +36,7 @@ describe("InMemoryUserRepository", () => {
       email: "ana@correo.com",
       givenName: "Ana",
       familyName: "Rivas",
-      role: "estudiante",
+      role: "coordinador",
       createdAt: "2026-01-01T00:00:00.000Z",
     });
     expect(await repo.findById("missing")).toBeNull();
@@ -65,42 +65,45 @@ describe("InMemoryUserRepository", () => {
     store.saveUser(makeStoredUser());
     const repo = new InMemoryUserRepository(store);
 
-    const updated = await repo.updateRole("u-1", "admin");
-    expect(updated?.role).toBe("admin");
-    expect((await repo.findById("u-1"))?.role).toBe("admin");
-    expect(await repo.updateRole("missing", "admin")).toBeNull();
+    const updated = await repo.updateRole("u-1", "admin_sistema");
+    expect(updated?.role).toBe("admin_sistema");
+    expect((await repo.findById("u-1"))?.role).toBe("admin_sistema");
+    expect(await repo.updateRole("missing", "admin_sistema")).toBeNull();
   });
 
-  it("listAuthors returns every registered user as a light option", async () => {
+  it("listByRole returns only the users with the requested role", async () => {
     const store = new MemoryUserStore();
-    store.saveUser(makeStoredUser({ id: "u-1", username: "a.rivas", givenName: "Ana", familyName: "Rivas" }));
-    store.saveUser(makeStoredUser({ id: "u-2", username: "b.gomez", email: "b@correo.com", givenName: "Bruno", familyName: "Gomez" }));
+    store.saveUser(makeStoredUser({ id: "u-1", username: "a.rivas", givenName: "Ana", familyName: "Rivas", role: "coordinador" }));
+    store.saveUser(makeStoredUser({ id: "u-2", username: "b.gomez", email: "b@correo.com", givenName: "Bruno", familyName: "Gomez", role: "aprobador" }));
+    store.saveUser(makeStoredUser({ id: "u-3", username: "c.barrios", email: "c@correo.com", givenName: "Carla", familyName: "Barrios", role: "coordinador" }));
     const repo = new InMemoryUserRepository(store);
 
-    const authors = await repo.listAuthors();
-    expect(authors).toHaveLength(2);
-    expect(authors).toContainEqual({ id: "u-2", username: "b.gomez", fullName: "Bruno Gomez" });
+    const coordinadores = await repo.listByRole("coordinador");
+    expect(coordinadores).toHaveLength(2);
+    expect(coordinadores).toContainEqual({ id: "u-1", username: "a.rivas", fullName: "Ana Rivas" });
+    expect((await repo.listByRole("aprobador"))).toHaveLength(1);
+    expect(await repo.listByRole("admin_sistema")).toHaveLength(0);
   });
 
-  it("listAuthors sorts by fullName using the es locale", async () => {
+  it("listByRole sorts by fullName using the es locale", async () => {
     const store = new MemoryUserStore();
     store.saveUser(makeStoredUser({ id: "u-1", username: "a.rivas", givenName: "Ana", familyName: "Rivas" }));
     store.saveUser(makeStoredUser({ id: "u-2", username: "z.avila", email: "z@correo.com", givenName: "Zulay", familyName: "Avila" }));
     store.saveUser(makeStoredUser({ id: "u-3", username: "c.barrios", email: "c@correo.com", givenName: "Carla", familyName: "Barrios" }));
     const repo = new InMemoryUserRepository(store);
 
-    const names = (await repo.listAuthors()).map((a) => a.fullName);
+    const names = (await repo.listByRole("coordinador")).map((a) => a.fullName);
     expect(names).toEqual(["Ana Rivas", "Carla Barrios", "Zulay Avila"]);
   });
 
-  it("listAuthors never includes email or role fields", async () => {
+  it("listByRole never includes email or role fields", async () => {
     const store = new MemoryUserStore();
     store.saveUser(makeStoredUser());
     const repo = new InMemoryUserRepository(store);
 
-    const authors = await repo.listAuthors();
-    expect(authors[0]).not.toHaveProperty("email");
-    expect(authors[0]).not.toHaveProperty("role");
-    expect(Object.keys(authors[0]).sort()).toEqual(["fullName", "id", "username"]);
+    const options = await repo.listByRole("coordinador");
+    expect(options[0]).not.toHaveProperty("email");
+    expect(options[0]).not.toHaveProperty("role");
+    expect(Object.keys(options[0]).sort()).toEqual(["fullName", "id", "username"]);
   });
 });
