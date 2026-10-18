@@ -3,8 +3,8 @@ import { LoginForm } from "@/components/forms/login-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
 export const metadata: Metadata = {
-  title: "Iniciar sesión | Red FaCyT",
-  description: "Accede a Red FaCyT para publicar y consultar información de la facultad.",
+  title: "Iniciar sesión | Sistema de Control de Proyectos y Recursos",
+  description: "Accede al sistema para gestionar proyectos, inventario, solicitudes y reportes.",
 };
 
 /**

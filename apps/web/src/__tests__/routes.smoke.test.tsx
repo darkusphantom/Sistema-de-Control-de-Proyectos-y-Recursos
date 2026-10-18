@@ -56,7 +56,7 @@ describe("route smoke tests", () => {
 
   it("renders the login page", async () => {
     render(<LoginPage />);
-    expect(await screen.findByRole("heading", { name: "Iniciar sesión" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Sistema de Control de Proyectos y Recursos" })).toBeInTheDocument();
   });
 
   it("renders the register page", async () => {

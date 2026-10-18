@@ -107,6 +107,7 @@ export function RegisterForm() {
             autoComplete="given-name"
             error={errors["given-name"]}
             onBlur={handleBlur}
+            maxLength={100}
           />
           <Field
             label="Apellido"
@@ -116,6 +117,7 @@ export function RegisterForm() {
             autoComplete="family-name"
             error={errors["family-name"]}
             onBlur={handleBlur}
+            maxLength={100}
           />
           <Field
             label="Correo"
@@ -126,6 +128,7 @@ export function RegisterForm() {
             autoComplete="email"
             error={errors.email}
             onBlur={handleBlur}
+            maxLength={254}
           />
           <Field
             label="Contraseña"
@@ -135,6 +138,7 @@ export function RegisterForm() {
             helpText="Mínimo 8 caracteres."
             error={errors["new-password"]}
             onBlur={handleBlur}
+            maxLength={100}
           />
           <Field
             label="Confirmar contraseña"
@@ -143,6 +147,7 @@ export function RegisterForm() {
             autoComplete="new-password"
             error={errors["confirm-password"]}
             onBlur={handleBlur}
+            maxLength={100}
           />
         </div>
 
@@ -154,6 +159,10 @@ export function RegisterForm() {
           {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
         </button>
       </form>
+
+      <p className="text-sm text-text-muted text-center">
+        Al registrarte se te asignará el rol de Coordinador de Proyecto
+      </p>
 
       <p className="text-center text-sm text-text">
         ¿Ya tienes cuenta?{" "}

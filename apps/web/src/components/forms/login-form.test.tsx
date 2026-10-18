@@ -31,7 +31,7 @@ describe("LoginForm", () => {
 
   it("renders correctly", () => {
     render(<LoginForm />);
-    expect(screen.getByRole("heading", { name: "Iniciar sesión" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Sistema de Control de Proyectos y Recursos" })).toBeInTheDocument();
     expect(screen.getByLabelText("Usuario")).toBeInTheDocument();
     expect(screen.getByLabelText("Contraseña")).toBeInTheDocument();
   });

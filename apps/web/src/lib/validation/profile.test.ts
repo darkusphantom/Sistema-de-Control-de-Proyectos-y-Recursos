@@ -62,7 +62,7 @@ describe("Profile validation", () => {
       const res = validateUpdateProfile(fd);
       expect(res.success).toBe(false);
       expect(res.errors.givenName).toBe("Escribe tu nombre.");
-      expect(res.errors.familyName).toBe("El apellido debe tener entre 2 y 60 caracteres.");
+      expect(res.errors.familyName).toBe("El apellido debe tener entre 2 y 100 caracteres.");
       expect(res.errors.email).toBe("Escribe un correo válido, por ejemplo nombre@correo.com.");
       expect(res.errors.bio).toBe("La bio no puede superar los 160 caracteres.");
     });

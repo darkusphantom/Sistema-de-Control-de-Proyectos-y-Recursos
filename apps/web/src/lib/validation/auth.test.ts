@@ -19,7 +19,7 @@ describe("Auth Validation", () => {
       expect(validateUsername("   ")).toBe("Escribe tu usuario.");
     });
     it("returns error if > 50 chars", () => {
-      expect(validateUsername("a".repeat(51))).toBe("Escribe tu usuario.");
+      expect(validateUsername("a".repeat(51))).toBe("El usuario debe tener como máximo 50 caracteres.");
     });
   });
 
@@ -31,12 +31,12 @@ describe("Auth Validation", () => {
       expect(validateName("")).toBe("Escribe tu nombre.");
       expect(validateName("", true)).toBe("Escribe tu apellido.");
     });
-    it("returns error for length < 2 or > 60", () => {
-      expect(validateName("a")).toBe("El nombre debe tener entre 2 y 60 caracteres.");
-      expect(validateName("a".repeat(61))).toBe("El nombre debe tener entre 2 y 60 caracteres.");
+    it("returns error for length < 2 or > 100", () => {
+      expect(validateName("a")).toBe("El nombre debe tener entre 2 y 100 caracteres.");
+      expect(validateName("a".repeat(101))).toBe("El nombre debe tener entre 2 y 100 caracteres.");
     });
     it("returns error for invalid chars", () => {
-      expect(validateName("John123")).toBe("El nombre debe tener entre 2 y 60 caracteres.");
+      expect(validateName("John123")).toBe("El nombre debe tener entre 2 y 100 caracteres.");
     });
   });
 
@@ -52,7 +52,7 @@ describe("Auth Validation", () => {
     });
     it("returns error for length > 254", () => {
       const longEmail = "a".repeat(245) + "@correo.com"; // > 254
-      expect(validateEmail(longEmail)).toBe("Escribe un correo válido, por ejemplo nombre@correo.com.");
+      expect(validateEmail(longEmail)).toBe("El correo electrónico debe tener como máximo 254 caracteres.");
     });
   });
 
@@ -64,14 +64,14 @@ describe("Auth Validation", () => {
       expect(validatePassword("")).toBe("Escribe tu contraseña.");
     });
     it("returns length error for register if < 8", () => {
-      expect(validatePassword("1234567")).toBe("La contraseña debe tener al menos 8 caracteres.");
+      expect(validatePassword("1234567")).toBe("La contraseña debe tener entre 8 y 100 caracteres.");
     });
-    it("returns length error for register if > 128", () => {
-      expect(validatePassword("a".repeat(129))).toBe("La contraseña debe tener al menos 8 caracteres.");
+    it("returns length error for register if > 100", () => {
+      expect(validatePassword("a".repeat(101))).toBe("La contraseña debe tener entre 8 y 100 caracteres.");
     });
     it("login password validation only checks presence and max length", () => {
       expect(validatePassword("short", true)).toBeNull();
-      expect(validatePassword("a".repeat(129), true)).toBe("Escribe tu contraseña.");
+      expect(validatePassword("a".repeat(101), true)).toBe("La contraseña debe tener como máximo 100 caracteres.");
     });
   });
 

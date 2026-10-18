@@ -6,7 +6,7 @@
 export function validateUsername(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return "Escribe tu usuario.";
-  if (trimmed.length > 50) return "Escribe tu usuario.";
+  if (trimmed.length > 50) return "El usuario debe tener como máximo 50 caracteres.";
   return null;
 }
 
@@ -20,9 +20,9 @@ export function validateName(value: string, isSurname: boolean = false): string 
   const trimmed = value.trim();
   const label = isSurname ? "apellido" : "nombre";
   if (!trimmed) return `Escribe tu ${label}.`;
-  if (trimmed.length < 2 || trimmed.length > 60) return `El ${label} debe tener entre 2 y 60 caracteres.`;
+  if (trimmed.length < 2 || trimmed.length > 100) return `El ${label} debe tener entre 2 y 100 caracteres.`;
   // Letras con acentos, espacio, '-' y '\''
-  if (!/^[\p{L}\s\-']+$/u.test(trimmed)) return `El ${label} debe tener entre 2 y 60 caracteres.`;
+  if (!/^[\p{L}\s\-']+$/u.test(trimmed)) return `El ${label} debe tener entre 2 y 100 caracteres.`;
   return null;
 }
 
@@ -34,7 +34,7 @@ export function validateName(value: string, isSurname: boolean = false): string 
 export function validateEmail(value: string): string | null {
   const trimmed = value.trim();
   if (!trimmed) return "Escribe tu correo.";
-  if (trimmed.length > 254) return "Escribe un correo válido, por ejemplo nombre@correo.com.";
+  if (trimmed.length > 254) return "El correo electrónico debe tener como máximo 254 caracteres.";
   
   // Basic format validation
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,11 +52,11 @@ export function validateEmail(value: string): string | null {
 export function validatePassword(value: string, isLogin: boolean = false): string | null {
   if (!value) return "Escribe tu contraseña.";
   if (isLogin) {
-    if (value.length > 128) return "Escribe tu contraseña.";
+    if (value.length > 100) return "La contraseña debe tener como máximo 100 caracteres.";
     return null;
   }
   // Register rules
-  if (value.length < 8 || value.length > 128) return "La contraseña debe tener al menos 8 caracteres.";
+  if (value.length < 8 || value.length > 100) return "La contraseña debe tener entre 8 y 100 caracteres.";
   return null;
 }
 
@@ -68,6 +68,7 @@ export function validatePassword(value: string, isLogin: boolean = false): strin
  */
 export function validateConfirmPassword(password: string, confirm: string): string | null {
   if (!confirm) return "Escribe la contraseña otra vez.";
+  if (confirm.length > 100) return "La confirmación debe tener como máximo 100 caracteres.";
   if (password !== confirm) return "Las contraseñas no coinciden.";
   return null;
 }

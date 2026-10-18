@@ -73,9 +73,9 @@ export function LoginForm() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h1 className="font-display text-h1 text-text">Iniciar sesión</h1>
+        <h1 className="font-display text-h1 text-text">Sistema de Control de Proyectos y Recursos</h1>
         <p className="text-base text-text-muted">
-          Accede a Red FaCyT para publicar y consultar información de la facultad.
+          Accede al sistema para gestionar proyectos, inventario, solicitudes y reportes.
         </p>
       </div>
 
@@ -97,6 +97,7 @@ export function LoginForm() {
             autoComplete="username"
             error={errors.username}
             onBlur={handleBlur}
+            maxLength={50}
           />
           <Field
             label="Contraseña"
@@ -105,6 +106,7 @@ export function LoginForm() {
             autoComplete="current-password"
             error={errors.password}
             onBlur={handleBlur}
+            maxLength={100}
           />
         </div>
 

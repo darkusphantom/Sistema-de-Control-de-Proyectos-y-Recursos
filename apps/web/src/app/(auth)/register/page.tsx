@@ -3,8 +3,8 @@ import { RegisterForm } from "@/components/forms/register-form";
 import { AuthGuard } from "@/components/auth/auth-guard";
 
 export const metadata: Metadata = {
-  title: "Crear cuenta | Red FaCyT",
-  description: "Regístrate para publicar y consultar información de la facultad.",
+  title: "Crear cuenta | Sistema de Control de Proyectos y Recursos",
+  description: "Regístrate para gestionar proyectos, inventario, solicitudes y reportes.",
 };
 
 /**
