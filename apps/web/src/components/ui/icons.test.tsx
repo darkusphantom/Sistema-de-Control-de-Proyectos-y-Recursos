@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { render } from "@testing-library/react";
-import type { ComponentType } from "react";
 import * as icons from "./icons";
 
 /**
@@ -10,7 +9,7 @@ import * as icons from "./icons";
  */
 describe("icons", () => {
   const entries = Object.entries(icons).filter(
-    (entry): entry is [string, ComponentType] =>
+    (entry): entry is [string, (typeof icons)[keyof typeof icons]] =>
       typeof entry[1] === "function",
   );
 

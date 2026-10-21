@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field } from "@/components/ui/field";
 import { buttonStyles } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/form-alert";
 import { validateLogin, validateUsername, validatePassword } from "@/lib/validation/auth";
+import { applyFieldError } from "@/lib/validation/form-errors";
 import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
 
 const gateway = new StaticAuthGateway();
@@ -25,7 +26,7 @@ export function LoginForm() {
   const [globalError, setGlobalError] = useState<string | undefined>();
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -51,9 +52,9 @@ export function LoginForm() {
       const passwordInput = formRef.current?.elements.namedItem("password") as HTMLInputElement;
       if (passwordInput) passwordInput.value = "";
     }
-  };
+  }, [isSubmitting, router]);
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     if (!hasSubmitted) return;
     
     const { name, value } = e.target;
@@ -62,13 +63,10 @@ export function LoginForm() {
     if (name === "username") error = validateUsername(value);
     if (name === "password") error = validatePassword(value, true);
 
-    setErrors(prev => {
-      const next = { ...prev };
-      if (error) next[name] = error;
-      else delete next[name];
-      return next;
-    });
-  };
+    // `applyFieldError` devuelve la misma referencia cuando el error no cambia,
+    // por lo que React omite el re-render de los campos intactos.
+    setErrors(prev => applyFieldError(prev, name, error));
+  }, [hasSubmitted]);
 
   return (
     <div className="flex flex-col gap-6">

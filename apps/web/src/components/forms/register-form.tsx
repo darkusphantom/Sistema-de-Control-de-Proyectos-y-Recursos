@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field } from "@/components/ui/field";
@@ -13,6 +13,7 @@ import {
   validatePassword, 
   validateConfirmPassword 
 } from "@/lib/validation/auth";
+import { applyFieldError } from "@/lib/validation/form-errors";
 import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
 
 const gateway = new StaticAuthGateway();
@@ -31,7 +32,7 @@ export function RegisterForm() {
   const [globalError, setGlobalError] = useState<string | undefined>();
   const [hasSubmitted, setHasSubmitted] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -55,9 +56,9 @@ export function RegisterForm() {
       setIsSubmitting(false);
       // In register, we conserve all written values including password, per design spec §11.1
     }
-  };
+  }, [isSubmitting, router]);
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
     if (!hasSubmitted) return;
     
     const { name, value } = e.target;
@@ -72,13 +73,10 @@ export function RegisterForm() {
       error = validateConfirmPassword(password?.value || "", value);
     }
 
-    setErrors(prev => {
-      const next = { ...prev };
-      if (error) next[name] = error;
-      else delete next[name];
-      return next;
-    });
-  };
+    // `applyFieldError` devuelve la misma referencia cuando el error no cambia,
+    // por lo que React omite el re-render de los campos intactos.
+    setErrors(prev => applyFieldError(prev, name, error));
+  }, [hasSubmitted]);
 
   return (
     <div className="flex flex-col gap-6">

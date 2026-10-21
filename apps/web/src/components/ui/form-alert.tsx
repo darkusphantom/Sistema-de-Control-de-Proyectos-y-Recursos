@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, memo } from "react";
 import { cn } from "@/lib/cn";
 import { AlertTriangleIcon } from "./icons";
 
@@ -16,8 +16,10 @@ export interface FormAlertProps {
  * - Rendered when there are 2+ field errors OR a global error.
  * - Uses `role="alert"` and automatically receives focus via `tabIndex={-1}`.
  * - Each item is a button that moves focus to the corresponding field when clicked.
+ * - Wrapped in `React.memo`: it only re-renders when `errors`/`globalError`
+ *   actually change, not on every unrelated form state change.
  */
-export function FormAlert({ errors, globalError, className }: FormAlertProps) {
+export const FormAlert = memo(function FormAlert({ errors, globalError, className }: FormAlertProps) {
   const alertRef = useRef<HTMLDivElement>(null);
   
   const entries = Object.entries(errors);
@@ -70,4 +72,4 @@ export function FormAlert({ errors, globalError, className }: FormAlertProps) {
       </ul>
     </div>
   );
-}
+});
