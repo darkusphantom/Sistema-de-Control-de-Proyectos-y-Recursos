@@ -70,6 +70,15 @@
 - Priorizar información crítica arriba-izquierda. Evitar sobrecargar (menos densidad, más legibilidad).
 - Incluir estado vacío ("No hay alertas críticas" / "No hay proyectos activos") con ilustración/ícono sutil.
 
+**Estado de implementación (2026-10-20) — Spec: [`docs/design/wireframes_dashboard.md`](design/wireframes_dashboard.md)**
+
+- ✅ Cabecera, KPIs, alertas, avance/distribución, actividad y acciones rápidas implementadas (Fase 2b, adapter estático `DashboardRepository`).
+- ✅ Selector de período (Hoy/Semana/Mes/Trimestre) incluido: filtra KPIs, alertas y actividad.
+- ⏳ **Deuda registrada — Acciones rápidas deshabilitadas**: "Nuevo proyecto", "Nueva solicitud de gasto" y "Registrar despacho" se muestran **deshabilitadas con badge "Próximamente"** porque sus destinos `/projects/new`, `/expenses/new` y `/dispatches/new` **no existen todavía**. Se habilitan al implementar `§3.2`, `§5.1` y `§4.3` respectivamente; al hacerlo hay que retirar el badge y convertirlos en enlaces aprobados por rol.
+- ⏳ **Deuda registrada — Alertas y enlaces "Ver todo"/"Ver bitácora"**: las filas de alerta y los enlaces de pie de sección quedan **no clicables** hasta que existan las rutas de detalle (`/inventory`, `/equipment`, `/expenses`, `/dispatches`, `/logs`). Misma regla: habilitar al crear la vista destino.
+- ⏳ **Acento azul Apple `#0071E3`**: el roadmap lo recomienda para los KPIs, pero **la migración de tokens es la Fase 4** del pivot (`pivot-project.md` §8). El dashboard usa el token `--accent` actual (ámbar `#d97706`) y cambiará de forma automática al migrar los tokens.
+- ⏳ **Datos reales**: hoy el dashboard lee un adapter estático; la conexión a PostgreSQL/API corresponde a la Fase 5.
+
 ## 3. Módulo de Proyectos
 
 ### 3.1 `/projects` — Lista de Proyectos

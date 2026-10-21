@@ -14,7 +14,8 @@ export type BadgeTone =
   | "category"
   | "success"
   | "muted"
-  | "warning";
+  | "warning"
+  | "danger";
 
 /** Props accepted by {@link Badge}. */
 export type BadgeProps = {
@@ -32,6 +33,7 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
   muted: "text-text-muted",
   warning: "text-warning",
   neutral: "text-text-muted",
+  danger: "text-danger",
 };
 
 /**

@@ -332,3 +332,33 @@ export function EyeOffIcon({ className }: IconProps) {
   );
 }
 
+/**
+ * Wrench icon: marks an equipment-maintenance alert in the dashboard panel.
+ *
+ * @param props - Icon props.
+ * @returns The SVG element.
+ */
+export function WrenchIcon({ className }: IconProps) {
+  return (
+    <svg {...ICON_BASE_PROPS} width={16} height={16} className={className}>
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.1-2.1z" />
+    </svg>
+  );
+}
+
+/**
+ * Cube icon: marks an inventory/stock alert in the dashboard panel.
+ *
+ * @param props - Icon props.
+ * @returns The SVG element.
+ */
+export function CubeIcon({ className }: IconProps) {
+  return (
+    <svg {...ICON_BASE_PROPS} width={16} height={16} className={className}>
+      <path d="m21 16-9 5-9-5V8l9-5 9 5z" />
+      <path d="m3 8 9 5 9-5" />
+      <path d="M12 13v8" />
+    </svg>
+  );
+}
+

@@ -66,8 +66,8 @@ describe("route smoke tests", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the dashboard page", () => {
-    render(<DashboardPage />);
+  it("renders the dashboard page", async () => {
+    render(await DashboardPage());
     expect(
       screen.getByRole("heading", { level: 1, name: /Dashboard/i }),
     ).toBeInTheDocument();
