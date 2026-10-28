@@ -15,7 +15,12 @@ export type KpiGridProps = {
 };
 
 /**
- * Formatea un monto monetario en es-VE sin decimales para la card de presupuesto.
+ * Formatea un monto monetario sin decimales para la card de presupuesto.
+ *
+ * Usa `es-VE` (separador de miles `.`) porque el wireframe especifica el
+ * formato `$45.000` (`docs/design/wireframes_dashboard.md` §5.2). El símbolo
+ * `$` se antepone a mano al no declararse una divisa en el modelo; extraer un
+ * `formatAmount` reutilizable queda como mejora futura.
  *
  * @param amount - Monto a formatear, o `null`.
  * @returns El monto formateado (p. ej. `$45.000`), o `null` si no hay dato.

@@ -26,11 +26,16 @@ const dashboardRepository = new StaticDashboardRepository();
  * @returns La página del dashboard ejecutivo.
  */
 export default async function DashboardPage() {
-  const nowIso = new Date().toISOString();
+  // Una única referencia temporal para los 4 snapshots y para la vista: evita
+  // que dos períodos se calculen sobre instantes distintos (ver contrato
+  // `DashboardRepository.getSnapshot`).
+  const now = new Date();
+  const nowIso = now.toISOString();
 
   const snapshotEntries = await Promise.all(
     PERIODS.map(
-      async (period) => [period, await dashboardRepository.getSnapshot(period)] as const,
+      async (period) =>
+        [period, await dashboardRepository.getSnapshot(period, now)] as const,
     ),
   );
 

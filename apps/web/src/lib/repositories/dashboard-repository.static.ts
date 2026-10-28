@@ -120,12 +120,16 @@ export class StaticDashboardRepository implements DashboardRepository {
    * Construye el snapshot de indicadores para el período solicitado.
    *
    * @param period - Período del selector (Hoy/Semana/Mes/Trimestre).
+   * @param now - Referencia temporal inyectable; por defecto, el instante
+   *   actual. Inyectarla mantiene el adapter determinista en tests y unifica
+   *   la base temporal entre llamadas de una misma petición.
    * @returns El snapshot filtrado y ordenado.
    * @complexity O(n + a + i) — n proyectos, a alertas e i ítems de actividad.
    */
-  async getSnapshot(period: DashboardPeriod): Promise<DashboardSnapshot> {
-    const now = new Date();
-
+  async getSnapshot(
+    period: DashboardPeriod,
+    now: Date = new Date(),
+  ): Promise<DashboardSnapshot> {
     const alerts = filterByPeriod(
       SEED_ALERTS.map((alert) => ({
         id: alert.id,

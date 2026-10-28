@@ -12,12 +12,23 @@ type EmptyStateAction = {
   onClick?: () => void;
 };
 
+/** Heading level used for the empty-state title. */
+export type EmptyStateTitleAs = "h2" | "h3" | "p";
+
 /** Props accepted by {@link EmptyState}. */
 export type EmptyStateProps = {
   /** Decorative icon (must be `aria-hidden`). */
   icon?: ReactNode;
   /** Primary message heading. */
   title: string;
+  /**
+   * Element used to render `title`. Defaults to `"h2"`.
+   *
+   * Use `"p"` or `"h3"` when the empty state is nested inside a section that
+   * already exposes an `h2`, so the document outline keeps one section-level
+   * heading per region (`docs/design/wireframes_dashboard.md` §8).
+   */
+  titleAs?: EmptyStateTitleAs;
   /** Supporting explanation text. */
   description?: string;
   /** Optional call-to-action: link or button. */
@@ -32,8 +43,9 @@ export type EmptyStateProps = {
  * - "No results matching filters".
  * - Error states with a retry action.
  *
- * Will be reused by `/profile` and `/admin` screens
- * (`docs/design/wireframes_feed.md` §6.7).
+ * When nested inside a section that already renders an `h2`, pass
+ * `titleAs="p"` (or `"h3"`) so the empty state does not introduce a second
+ * section-level heading (`docs/design/wireframes_dashboard.md` §8).
  *
  * @param props - Empty state props.
  * @returns A centred card with icon, title, description and optional action.
@@ -41,9 +53,21 @@ export type EmptyStateProps = {
 export function EmptyState({
   icon,
   title,
+  titleAs = "h2",
   description,
   action,
 }: EmptyStateProps) {
+  const titleClassName = "font-display text-h3 text-text";
+
+  const titleElement =
+    titleAs === "p" ? (
+      <p className={titleClassName}>{title}</p>
+    ) : titleAs === "h3" ? (
+      <h3 className={titleClassName}>{title}</h3>
+    ) : (
+      <h2 className={titleClassName}>{title}</h2>
+    );
+
   return (
     <div className="border border-border rounded-lg bg-surface p-10 text-center flex flex-col items-center gap-3">
       {icon && (
@@ -52,7 +76,7 @@ export function EmptyState({
         </span>
       )}
 
-      <h2 className="font-display text-h3 text-text">{title}</h2>
+      {titleElement}
 
       {description && (
         <p className="max-w-sm text-sm text-text-muted">{description}</p>

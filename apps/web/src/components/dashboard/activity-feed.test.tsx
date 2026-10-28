@@ -104,4 +104,12 @@ describe("ActivityFeed", () => {
       screen.getByText("No hay actividad reciente en este período"),
     ).toBeInTheDocument();
   });
+
+  it("no duplica el encabezado de nivel 2 en el estado vacío", () => {
+    render(<ActivityFeed items={[]} now={now} />);
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 2, name: /Actividad reciente/i }),
+    ).toBeInTheDocument();
+  });
 });

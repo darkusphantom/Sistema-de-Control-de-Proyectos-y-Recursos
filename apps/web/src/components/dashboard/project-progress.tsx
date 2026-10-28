@@ -72,6 +72,7 @@ export function ProjectProgress({ rows }: ProjectProgressProps) {
         <EmptyState
           icon={<SlidersIcon className="size-10" />}
           title="No hay proyectos activos"
+          titleAs="p"
           description="Cuando se registren proyectos aparecerán aquí sus indicadores."
         />
       ) : (
@@ -96,6 +97,7 @@ export function ProjectProgress({ rows }: ProjectProgressProps) {
                   <span
                     role="progressbar"
                     aria-valuenow={progress === null ? undefined : safeProgress}
+                    aria-valuetext={progress === null ? "Sin dato" : undefined}
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-label={`Avance físico ${row.code}`}

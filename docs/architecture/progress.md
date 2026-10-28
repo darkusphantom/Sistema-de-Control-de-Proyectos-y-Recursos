@@ -60,6 +60,7 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | **Diseño del Dashboard Ejecutivo `/dashboard` (Fase 2a)** | Spec completa en `docs/design/wireframes_dashboard.md` (9 secciones): cabecera con selector de período, 5 KPIs, alertas críticas, avance/distribución, actividad, acciones rápidas deshabilitadas, estados globales, contrato `DashboardRepository`, checklist a11y. Decisiones: acento ámbar actual hasta Fase 4 (no azul Apple), selector de período incluido, acciones rápidas con "Próximamente". `docs/roadmap-pivot.md` §2.1 registra 4 deudas. | 2026-10-20 |
 | **Dashboard Ejecutivo `/dashboard` (Fase 2b)** | Implementado con arquitectura hexagonal: contrato `DashboardRepository` + `StaticDashboardRepository` (12 proyectos, 7 alertas, 8 actividades relativas a `now`) + contract test. Dominio puro en `lib/dashboard/metrics.ts` (8 funciones: avance ponderado por presupuesto, ejecución presupuestaria con guardia de división por cero, conteos por estatus/prioridad, filtrado por período con `now` inyectado). Componentes en `components/dashboard/`: `dashboard-header` (h1, fecha es-ES, SelectField desktop + radiogroup accesible móvil), `kpi-grid`/`kpi-card` (5 KPIs con `tabular-nums` y `—` para nulos), `alerts-panel`, `project-progress` (progressbar ARIA + umbrales), `project-distribution`, `activity-feed` (`<time dateTime>`), `quick-actions` (deshabilitadas). Página: Server Component resuelve 4 snapshots y el único estado interactivo (período) vive en `DashboardView` cliente con `useState`. Añadido tono `danger` a `Badge` e iconos `WrenchIcon`/`CubeIcon`. | 2026-10-20 |
 | Gate de cobertura reactivado en pre-commit | `.husky/pre-commit` pasa de `pnpm -r lint` a `pnpm -r lint` + `pnpm -r test:coverage`, restaurando el gate ≥80% exigido por `AGENTS.md` §5 (estaba comentado desde el commit del monorepo `ac978ce`). | 2026-10-20 |
+| **Review QA + correcciones del Dashboard (Fase 2b)** | `qa-reviewer` sobre el commit `63111f5`: **aprueba con observaciones** (0 bloqueantes, 4 mayores, 5 menores, 4 sugerencias). Reporte en `docs/review-qa/2026-10-20-review-qa-dashboard-fase-2b.md`. Corregidos: `EmptyState` gana `titleAs` (evita doble `h2` en estado vacío; +3 tests), `getSnapshot(period, now?)` con referencia temporal inyectable y un único `now` en la página, `aria-valuetext="Sin dato"` en progressbar sin valor, `as never` → `Set<string>` en `project-distribution`. Documentados: desviación del pre-cómputo en servidor vs. `useMemo` de la spec §7, formato `es-VE` intencional, `text-h2` intencional en el `h1`. Tests web: 434/434 (+6). Quedan diferidas 6 observaciones (assertions deterministas, `<time>` vacío, refactors y payload de 4 snapshots —este último a Fase 5). | 2026-10-20 |
 
 ## En progreso
 
@@ -72,7 +73,8 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | Ítem | Depende de | Nota |
 | --- | --- | --- |
 | Fase 2 — Diseño del nuevo sistema | pivot Fase 1 ✅ | Dashboard ✅ (`wireframes_dashboard.md`). **Falta**: módulo de proyectos (Fase 3, `wireframes_projects.md` + `patterns_projects.md`) y el resto de módulos (inventario, equipos, solicitudes, overhead, reportes, auditoría, admin). Wireframes del dominio posts obsoletos. |
-| Review del Dashboard (Fase 2b) | Fase 2b ✅ | `qa-reviewer` sobre los 13 archivos de la Fase 2b (corrección, a11y, rendimiento) + `security-architect` del modelo de amenaza del nuevo dominio. |
+| Review del Dashboard (Fase 2b) | Fase 2b ✅ | Review `qa-reviewer` **realizado** el 2026-10-20 (`docs/review-qa/2026-10-20-review-qa-dashboard-fase-2b.md`): aprueba con observaciones, 0 bloqueantes. Pendiente: `security-architect` del modelo de amenaza del nuevo dominio. |
+| Observaciones QA diferidas del Dashboard | Fase 3 | 6 observaciones no bloqueantes del review: assertions deterministas por período (🟡-3), `<time>` vacío con fecha futura (🔵-2), `KpiCard` derivando `danger` de string (💡-1), extraer `PeriodSelector` (💡-2), "Ver todas" incondicional (💡-3, conforme a spec) y payload de 4 snapshots (💡-4 → Fase 5). |
 | KPIs del dashboard filtrados por período | Fase 3 | El fixture no modela fechas de proyecto; solo alertas y actividad se filtran. Requiere que `Project` tenga fechas. |
 | Gate de cobertura en `docs/husky.md` | — | Verificar que la doc del hook menciona `test:coverage` tras reactivarlo (2026-10-20). |
 | Fase 3 — Dominio compartido y API | Fase 2 | Tipos/schemas en shared, entidades y use cases (proyectos, inventario, equipos, solicitudes, overhead, audit), máquina de estados de aprobación, algoritmo de prorrateo (dominio puro + TDD), rutas con validación Zod. |
@@ -89,8 +91,8 @@ Archivo **dinámico** de seguimiento: refleja el estado real de implementación.
 | --- | --- | --- |
 | `@redfacyt/shared` (3 archivos, 37 tests de esquemas) | 37/37 pasan | 100% |
 | API `apps/api` (14 archivos, 127 tests) | 127/127 pasan | 94.53% stmts, 80.25% branches, 95.1% funcs |
-| Web `apps/web` (50 archivos, 428 tests) | 428/428 pasan | 95.38% stmts, 87.72% branches, 96.66% funcs |
-| **Monorepo Total (67 archivos de test)** | **592/592 pasan** | gate ≥ 80% PASS en las 3 workspaces |
+| Web `apps/web` (50 archivos, 434 tests) | 434/434 pasan | ≥95% stmts, ≥87% branches, ≥96% funcs |
+| **Monorepo Total (67 archivos de test)** | **598/598 pasan** | gate ≥ 80% PASS en las 3 workspaces |
 
 ## Registro de cambios (últimos)
 

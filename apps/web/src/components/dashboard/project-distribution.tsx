@@ -14,6 +14,14 @@ const CANONICAL_STATUS_ORDER = [
   "Finalizado",
 ] as const;
 
+/**
+ * Conjunto de estatus canónicos, para consultas de pertenencia en O(1) sin
+ * recurrir a casts sobre una tupla `readonly`.
+ */
+const CANONICAL_STATUS_LABELS: ReadonlySet<string> = new Set(
+  CANONICAL_STATUS_ORDER,
+);
+
 /** Tono de badge por prioridad (roadmap §3.1: colores semánticos). */
 const PRIORITY_TONES: Record<string, BadgeTone> = {
   Crítica: "danger",
@@ -47,7 +55,7 @@ function orderStatusCounts(counts: StatusCount[]): StatusCount[] {
   ).filter((entry): entry is StatusCount => entry !== undefined);
 
   const unknown = counts.filter(
-    (entry) => !CANONICAL_STATUS_ORDER.includes(entry.label as never),
+    (entry) => !CANONICAL_STATUS_LABELS.has(entry.label),
   );
 
   return [...known, ...unknown];

@@ -130,8 +130,14 @@ export interface DashboardRepository {
   /**
    * Devuelve el snapshot de indicadores para un período dado.
    *
+   * `now` es inyectable para que el adapter sea **determinista y testeable**
+   * sin depender del reloj real, y para que varias llamadas dentro de una
+   * misma petición compartan una única referencia temporal (evita que dos
+   * snapshots abarquen el cambio de medianoche).
+   *
    * @param period - Período del selector (Hoy/Semana/Mes/Trimestre).
+   * @param now - Referencia temporal; por defecto, el instante actual.
    * @returns El snapshot ya filtrado por el período solicitado.
    */
-  getSnapshot(period: DashboardPeriod): Promise<DashboardSnapshot>;
+  getSnapshot(period: DashboardPeriod, now?: Date): Promise<DashboardSnapshot>;
 }

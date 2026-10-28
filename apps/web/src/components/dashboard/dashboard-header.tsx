@@ -104,6 +104,8 @@ export function DashboardHeader({
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
+        {/* `text-h2` en el h1 es intencional: la spec §4 pide un título
+            visualmente compacto para no competir con los KPIs. */}
         <h1 className="font-display text-h2 font-bold text-text">Dashboard</h1>
         <p className="text-sm text-text-muted">{formatHeaderDate(referenceDate)}</p>
       </div>

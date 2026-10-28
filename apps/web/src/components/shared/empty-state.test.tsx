@@ -46,4 +46,25 @@ describe("EmptyState", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
+
+  it("renders the title as a level-2 heading by default", () => {
+    render(<EmptyState title="Sin publicaciones" />);
+    expect(
+      screen.getByRole("heading", { level: 2, name: /sin publicaciones/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders the title as a level-3 heading when titleAs is 'h3'", () => {
+    render(<EmptyState title="Sin proyectos" titleAs="h3" />);
+    expect(
+      screen.getByRole("heading", { level: 3, name: /sin proyectos/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { level: 2 })).not.toBeInTheDocument();
+  });
+
+  it("renders the title as a paragraph when titleAs is 'p'", () => {
+    render(<EmptyState title="Sin proyectos" titleAs="p" />);
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
+    expect(screen.getByText("Sin proyectos")).toBeInTheDocument();
+  });
 });

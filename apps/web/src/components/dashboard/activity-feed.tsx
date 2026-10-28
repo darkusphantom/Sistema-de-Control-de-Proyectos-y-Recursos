@@ -94,6 +94,7 @@ export function ActivityFeed({ items, now }: ActivityFeedProps) {
         <EmptyState
           icon={<SlidersIcon className="size-10" />}
           title="No hay actividad reciente en este período"
+          titleAs="p"
           description="Los despachos, cambios de prioridad y solicitudes aparecerán aquí."
         />
       ) : (

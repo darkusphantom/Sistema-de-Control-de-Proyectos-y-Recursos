@@ -84,4 +84,22 @@ describe("ProjectProgress", () => {
     expect(screen.getByText("No hay proyectos activos")).toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).toBeNull();
   });
+
+  it("no duplica el encabezado de nivel 2 en el estado vacío", () => {
+    render(<ProjectProgress rows={[]} />);
+    // Solo el h2 de la sección; el título del EmptyState no es encabezado.
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 2, name: /Avance por proyecto/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("expone 'Sin dato' como valuetext cuando el avance es null", () => {
+    render(<ProjectProgress rows={[row("PRY-009", "Sin medición", null)]} />);
+    const bar = screen.getByRole("progressbar", {
+      name: "Avance físico PRY-009",
+    });
+    expect(bar).toHaveAttribute("aria-valuetext", "Sin dato");
+    expect(bar).not.toHaveAttribute("aria-valuenow");
+  });
 });
