@@ -226,6 +226,7 @@ Cada requisito indica su prioridad (P0/P1/P2), cuándo aplica (**scaffold** ahor
   - Test: admin cambia rol de otro a `profesor`/`estudiante`/`admin` → `204` y el rol efectivo cambia en el store (inmediatez verificada por R14).
   - Test: cambiar el rol de **cualquier** `admin` (incluido uno mismo) → `409`/`422` y **no** muta el store.
   - Test: moderar un post `borrador` ajeno → `409`/`422` sin publicar; `publicado ⇄ oculto` → `200` y el feed refleja el cambio; no-admin → `403`; id inexistente → `404`.
+- **Estado (2026-10-29): implementado.** `set-user-role.ts` rechaza toda transición desde `admin_sistema` con `409 immutable_role` (propia o ajena) y `SetUserRoleSchema` ya no admite `admin_sistema` como destino, por lo que la API no puede crear administradores. La auditoría de cada cambio (`role_change`, sin PII) cubre D5. Tests en `admin.routes.test.ts`. Nota: los nombres de rol de este documento (`admin`, `estudiante`, `profesor`) son anteriores al pivot; los vigentes son `admin_sistema`, `coordinador` y `aprobador`.
 
 ### R17 — OpenAPI sin fuga y bloqueado en producción (P1 · esta entrega · joya P1-secretos)
 
