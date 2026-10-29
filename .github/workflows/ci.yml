@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24"
+
+jobs:
+  quality:
+    name: Lint · Tests · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install (lockfile estricto)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm -r lint
+
+      - name: Tests con cobertura (gate ≥ 80 %)
+        run: pnpm -r test:coverage
+
+      - name: Build
+        run: pnpm -r build
+
+  security:
+    name: Dependencias · Secretos · Adaptadores
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.22.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install (lockfile estricto)
+        run: pnpm install --frozen-lockfile
+
+      # Falla ante vulnerabilidades high/critical en dependencias de runtime.
+      # Los avisos de tooling de test (dev) se revisan aparte: ver
+      # docs/security/informe01.md §SR-03.
+      - name: Audit de dependencias de producción
+        run: pnpm audit --prod --audit-level=high
+
+      - name: Detección de secretos
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Gate de fase: la maqueta no puede publicarse. Si un archivo fuera del
+      # composition root importa un adaptador estático, el release se bloquea.
+      - name: Gate · adaptadores estáticos solo en el composition root
+        shell: bash
+        run: |
+          set -euo pipefail
+          offenders="$(grep -rlE 'from ".*\.static"' apps/web/src \
+            --include='*.ts' --include='*.tsx' \
+            | grep -vE '^apps/web/src/lib/(auth|repositories)/index\.ts$' \
+            | grep -vE '\.test\.tsx?$' || true)"
+          if [ -n "${offenders}" ]; then
+            echo "::error::Adaptadores estáticos importados fuera del composition root:"
+            echo "${offenders}"
+            exit 1
+          fi
+          echo "OK: los adaptadores estáticos solo se instancian en las factories."
