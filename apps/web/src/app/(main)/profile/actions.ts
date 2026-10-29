@@ -1,12 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-import { StaticUserRepository } from "@/lib/repositories/user-repository.static";
+import { userRepository } from "@/lib/repositories";
+import { authGateway } from "@/lib/auth";
 import { validateUpdateProfile, validateChangePassword } from "@/lib/validation/profile";
-
-const userRepo = new StaticUserRepository();
-const authGateway = new StaticAuthGateway();
 
 export async function updateProfileAction(formData: FormData) {
   const session = await authGateway.getSession();
@@ -28,7 +25,7 @@ export async function updateProfileAction(formData: FormData) {
       avatarUrl: formData.get("avatarUrl")?.toString() || null,
     };
     
-    await userRepo.update(session.user.id, patch);
+    await userRepository.update(session.user.id, patch);
     
     revalidatePath("/profile/[username]", "page");
     return { success: true };
@@ -70,7 +67,7 @@ export async function removeAvatarAction() {
   }
 
   try {
-    await userRepo.update(session.user.id, { avatarUrl: null });
+    await userRepository.update(session.user.id, { avatarUrl: null });
     revalidatePath("/profile/[username]", "page");
     return { success: true };
   } catch {

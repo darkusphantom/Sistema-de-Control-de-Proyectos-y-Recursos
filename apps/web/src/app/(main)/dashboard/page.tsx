@@ -1,5 +1,5 @@
 import { DashboardView } from "@/components/dashboard/dashboard-view";
-import { StaticDashboardRepository } from "@/lib/repositories/dashboard-repository.static";
+import { dashboardRepository } from "@/lib/repositories";
 import type {
   DashboardPeriod,
   DashboardSnapshot,
@@ -7,9 +7,6 @@ import type {
 
 /** Períodos para los que se resuelve el snapshot en el servidor. */
 const PERIODS: DashboardPeriod[] = ["hoy", "semana", "mes", "trimestre"];
-
-/** Repositorio estático del dashboard (fase sin backend; Fase 5 lo sustituye). */
-const dashboardRepository = new StaticDashboardRepository();
 
 /**
  * Dashboard ejecutivo — `/dashboard` (Fase 2b del pivot).

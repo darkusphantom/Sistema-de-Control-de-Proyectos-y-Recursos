@@ -8,9 +8,7 @@ import { buttonStyles } from "@/components/ui/button";
 import { FormAlert } from "@/components/ui/form-alert";
 import { validateLogin, validateUsername, validatePassword } from "@/lib/validation/auth";
 import { applyFieldError } from "@/lib/validation/form-errors";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-
-const gateway = new StaticAuthGateway();
+import { authGateway } from "@/lib/auth";
 
 /**
  * LoginForm component.
@@ -40,7 +38,7 @@ export function LoginForm() {
     if (!validation.success) return;
 
     setIsSubmitting(true);
-    const result = await gateway.signIn(formData);
+    const result = await authGateway.signIn(formData);
 
     if (result.success) {
       router.replace("/dashboard");

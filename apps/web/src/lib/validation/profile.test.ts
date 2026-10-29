@@ -39,6 +39,53 @@ describe("Profile validation", () => {
     });
   });
 
+  describe("validateUpdateProfile · avatarUrl", () => {
+    function formWithAvatar(avatarUrl: string): FormData {
+      const data = new FormData();
+      data.append("givenName", "Ana");
+      data.append("familyName", "Rivas");
+      data.append("email", "ana@correo.com");
+      data.append("bio", "");
+      data.append("avatarUrl", avatarUrl);
+      return data;
+    }
+
+    it("accepts a PNG data URL", () => {
+      const result = validateUpdateProfile(
+        formWithAvatar("data:image/png;base64,iVBORw0KGgo="),
+      );
+      expect(result.success).toBe(true);
+      expect(result.errors.avatarUrl).toBeUndefined();
+    });
+
+    it("rejects an external URL (no arbitrary remote avatars)", () => {
+      const result = validateUpdateProfile(
+        formWithAvatar("https://evil.example/avatar.png"),
+      );
+      expect(result.success).toBe(false);
+      expect(result.errors.avatarUrl).toBe("El formato de la foto no es válido.");
+    });
+
+    it("rejects a non-image data URL", () => {
+      const result = validateUpdateProfile(
+        formWithAvatar("data:text/html;base64,PHNjcmlwdD4="),
+      );
+      expect(result.errors.avatarUrl).toBe("El formato de la foto no es válido.");
+    });
+
+    it("rejects a data URL above the size cap", () => {
+      const result = validateUpdateProfile(
+        formWithAvatar("data:image/png;base64," + "a".repeat(7_000_000)),
+      );
+      expect(result.errors.avatarUrl).toBe("La foto no puede superar los 5 MB.");
+    });
+
+    it("accepts an empty avatarUrl (no avatar)", () => {
+      const result = validateUpdateProfile(formWithAvatar(""));
+      expect(result.errors.avatarUrl).toBeUndefined();
+    });
+  });
+
   describe("validateUpdateProfile", () => {
     it("returns success for valid data", () => {
       const fd = new FormData();

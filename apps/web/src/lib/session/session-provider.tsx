@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
+import { authGateway } from "@/lib/auth";
 import type { Session } from "@/lib/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -27,8 +27,6 @@ export type SessionContextValue = {
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 const SessionContext = createContext<SessionContextValue | null>(null);
-
-const gateway = new StaticAuthGateway();
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
 
@@ -64,7 +62,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   useEffect(() => {
     let cancelled = false;
 
-    gateway.getSession().then((resolved) => {
+    authGateway.getSession().then((resolved) => {
       if (cancelled) return;
 
       if (resolved) {
@@ -87,7 +85,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
   }, [status, router]);
 
   async function signOut() {
-    await gateway.signOut();
+    await authGateway.signOut();
     setSession(null);
     setStatus("anonymous");
   }

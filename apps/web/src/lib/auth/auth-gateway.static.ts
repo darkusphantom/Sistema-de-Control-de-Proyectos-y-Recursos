@@ -5,12 +5,40 @@ import { mockUsers } from "@/data/users";
 const SESSION_KEY = "facy:session";
 
 /**
+ * Indica si el bundle corre en producción.
+ *
+ * Next sustituye `process.env.NODE_ENV` en build, así que la comprobación es
+ * una constante en el bundle final (coste cero en runtime).
+ */
+function isProduction(): boolean {
+  return typeof process !== "undefined" && process.env.NODE_ENV === "production";
+}
+
+/**
  * A static, in-memory implementation of the AuthGateway.
  * Used during the frontend static phase before the real backend is connected.
  * It uses `localStorage` to simulate session persistence in the browser.
+ *
+ * Fail-closed: en un build de producción las operaciones de autenticación
+ * lanzan y `getSession` devuelve `null`, de modo que la maqueta no puede
+ * autenticar a nadie aunque se olvide sustituirla. El build sí funciona, para
+ * no bloquear una demo; el gate que impide publicarla vive en CI.
  */
 export class StaticAuthGateway implements AuthGateway {
+  /**
+   * Bloquea el uso de la maqueta en producción.
+   * @throws Error si `NODE_ENV === "production"`.
+   */
+  private assertNotProduction(): void {
+    if (isProduction()) {
+      throw new Error(
+        "La autenticación estática está deshabilitada en producción: conecta el adaptador HTTP de la API.",
+      );
+    }
+  }
+
   async signIn(credentials: FormData): Promise<AuthResult> {
+    this.assertNotProduction();
     const username = credentials.get("username")?.toString() || "";
     const password = credentials.get("password")?.toString() || "";
 
@@ -34,6 +62,7 @@ export class StaticAuthGateway implements AuthGateway {
   }
 
   async signUp(credentials: FormData): Promise<AuthResult> {
+    this.assertNotProduction();
     const email = credentials.get("email")?.toString().toLowerCase() || "";
     const givenName = credentials.get("given-name")?.toString() || "";
     const familyName = credentials.get("family-name")?.toString() || "";
@@ -72,7 +101,8 @@ export class StaticAuthGateway implements AuthGateway {
   }
 
   async getSession(): Promise<Session | null> {
-    if (typeof window === "undefined") return null;
+    // En producción no hay sesión simulada: la app queda como anónima.
+    if (isProduction() || typeof window === "undefined") return null;
 
     const stored = localStorage.getItem(SESSION_KEY);
     if (!stored) return null;
@@ -98,6 +128,7 @@ export class StaticAuthGateway implements AuthGateway {
   /**TODO: Implementar la logica para cambiar la contrasena */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async changePassword(_currentPassword: string, _newPassword: string): Promise<AuthResult> {
+    this.assertNotProduction();
     const session = await this.getSession();
     if (!session) {
       return { success: false, error: "No hay sesión activa." };

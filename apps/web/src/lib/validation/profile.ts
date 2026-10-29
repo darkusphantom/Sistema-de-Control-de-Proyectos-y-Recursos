@@ -1,3 +1,4 @@
+import { avatarDataUrlSchema } from "@redfacyt/shared";
 import { validateName, validateEmail } from "./auth";
 
 /**
@@ -38,6 +39,7 @@ export function validateUpdateProfile(data: FormData): { success: boolean; error
   const familyName = data.get("familyName")?.toString() || "";
   const email = data.get("email")?.toString() || "";
   const bio = data.get("bio")?.toString() || "";
+  const avatarUrl = data.get("avatarUrl")?.toString() || "";
   
   const givenNameError = validateName(givenName, false);
   if (givenNameError) errors.givenName = givenNameError;
@@ -50,6 +52,20 @@ export function validateUpdateProfile(data: FormData): { success: boolean; error
   
   const bioError = validateBio(bio);
   if (bioError) errors.bio = bioError;
+
+  // El servidor no confía en el input oculto: solo se aceptan data URLs PNG o
+  // JPEG (evita almacenar URLs externas arbitrarias en el perfil).
+  if (avatarUrl) {
+    const parsed = avatarDataUrlSchema.safeParse(avatarUrl);
+    if (!parsed.success) {
+      const tooLarge = parsed.error.issues.some(
+        (issue) => issue.message === "too_large",
+      );
+      errors.avatarUrl = tooLarge
+        ? "La foto no puede superar los 5 MB."
+        : "El formato de la foto no es válido.";
+    }
+  }
   
   return {
     success: Object.keys(errors).length === 0,

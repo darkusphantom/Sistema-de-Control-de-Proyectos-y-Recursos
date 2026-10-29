@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-
-const gateway = new StaticAuthGateway();
+import { authGateway } from "@/lib/auth";
 
 /**
  * Guard de cliente para las páginas públicas de auth.
@@ -19,7 +17,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    gateway.getSession().then((session) => {
+    authGateway.getSession().then((session) => {
       if (session) {
         router.replace("/dashboard");
       } else {

@@ -1,10 +1,7 @@
 import { notFound } from "next/navigation";
 import { UserProfileView } from "@/components/profile/user-profile-view";
-import { StaticUserRepository } from "@/lib/repositories/user-repository.static";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-
-const userRepo = new StaticUserRepository();
-const authGateway = new StaticAuthGateway();
+import { userRepository } from "@/lib/repositories";
+import { authGateway } from "@/lib/auth";
 
 type ProfilePageProps = {
   params: Promise<{ username: string }>;
@@ -26,7 +23,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   // Decodificamos el username para manejar caracteres especiales en la URL
   // y removemos el prefijo '@' por si el usuario lo tipeó manualmente en la barra de direcciones.
   const decodedUsername = decodeURIComponent(username).replace(/^@/, "");
-  const user = await userRepo.findByUsername(decodedUsername);
+  const user = await userRepository.findByUsername(decodedUsername);
 
   if (!user) {
     notFound();

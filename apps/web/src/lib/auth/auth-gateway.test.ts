@@ -105,6 +105,55 @@ describe("StaticAuthGateway", () => {
     });
   });
 
+  describe("production guard (fail-closed)", () => {
+    afterEach(() => {
+      vi.unstubAllEnvs();
+    });
+
+    it("does not authenticate in production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      const formData = new FormData();
+      formData.append("username", "admin");
+      formData.append("password", "anypassword");
+
+      await expect(gateway.signIn(formData)).rejects.toThrow(
+        /deshabilitada en producción/,
+      );
+      expect(localStorage.getItem(SESSION_KEY)).toBeNull();
+    });
+
+    it("does not register users in production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      const formData = new FormData();
+      formData.append("email", "prod@correo.com");
+      formData.append("given-name", "Prod");
+      formData.append("family-name", "User");
+
+      await expect(gateway.signUp(formData)).rejects.toThrow(
+        /deshabilitada en producción/,
+      );
+    });
+
+    it("does not change passwords in production", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+      await expect(
+        gateway.changePassword("secreto123", "nuevaclave123"),
+      ).rejects.toThrow(/deshabilitada en producción/);
+    });
+
+    it("returns no session in production", async () => {
+      localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({
+          user: { id: "1", username: "test", role: "coordinador" },
+          expiresAt: new Date(Date.now() + 10000).toISOString(),
+        }),
+      );
+      vi.stubEnv("NODE_ENV", "production");
+      await expect(gateway.getSession()).resolves.toBeNull();
+    });
+  });
+
   describe("changePassword", () => {
     it("simulates success when there is an active session", async () => {
       const mockSession = {

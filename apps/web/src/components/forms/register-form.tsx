@@ -14,9 +14,7 @@ import {
   validateConfirmPassword 
 } from "@/lib/validation/auth";
 import { applyFieldError } from "@/lib/validation/form-errors";
-import { StaticAuthGateway } from "@/lib/auth/auth-gateway.static";
-
-const gateway = new StaticAuthGateway();
+import { authGateway } from "@/lib/auth";
 
 /**
  * RegisterForm component.
@@ -46,7 +44,7 @@ export function RegisterForm() {
     if (!validation.success) return;
 
     setIsSubmitting(true);
-    const result = await gateway.signUp(formData);
+    const result = await authGateway.signUp(formData);
 
     if (result.success) {
       router.replace("/dashboard");
