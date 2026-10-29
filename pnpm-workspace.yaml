@@ -1,7 +1,14 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# pnpm 11: política de scripts de instalación. Solo esbuild los necesita;
+# sharp y unrs-resolver quedan explícitamente fuera.
 allowBuilds:
   esbuild: true
   sharp: false
   unrs-resolver: false
+
+# Parche de un transitivo de jsdom (solo test): undici 8.11.2 → 8.12.2.
+overrides:
+  undici@<8.12.2: 8.12.2
