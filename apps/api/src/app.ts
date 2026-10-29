@@ -9,6 +9,7 @@ import { InMemoryUserRepository } from "./infrastructure/repositories/in-memory/
 import { MemoryUserStore } from "./infrastructure/repositories/in-memory/user-store";
 import { bodyLimitMiddleware } from "./middleware/body-limit";
 import { corsWhitelist } from "./middleware/cors";
+import { noStore } from "./middleware/no-store";
 import { parseCorsOrigins } from "./middleware/cors";
 import { ensureCsrfToken } from "./middleware/csrf";
 import { createErrorHandler } from "./middleware/error-handler";
@@ -77,6 +78,7 @@ export function createApp(options: AppOptions): Hono {
 
   app.use("*", requestId());
   app.use("*", securityHeaders());
+  app.use("*", noStore());
   app.use("*", corsWhitelist(env.CORS_ORIGINS));
   app.use("*", bodyLimitMiddleware(env.MAX_BODY_BYTES));
   // Emite la cookie de doble envío CSRF en TODAS las respuestas si falta, de

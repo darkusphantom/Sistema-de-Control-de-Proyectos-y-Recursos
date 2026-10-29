@@ -3,7 +3,7 @@ import { buildApp } from "./test-helpers";
 
 describe("OpenAPI routes", () => {
   it("serves /api/v1/openapi.json with wire forms and no secrets in dev", async () => {
-    const { app } = buildApp();
+    const { app } = buildApp({ OPENAPI_ENABLED: "true" });
     const response = await app.request("/api/v1/openapi.json");
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("application/json");
@@ -27,7 +27,7 @@ describe("OpenAPI routes", () => {
   });
 
   it("serves the /api/v1/docs page in dev", async () => {
-    const { app } = buildApp();
+    const { app } = buildApp({ OPENAPI_ENABLED: "true" });
     const response = await app.request("/api/v1/docs");
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toContain("text/html");
@@ -43,6 +43,12 @@ describe("OpenAPI routes", () => {
     expect((await app.request("/api/v1/docs")).status).toBe(404);
   });
 
+  it("keeps openapi.json and docs disabled by default", async () => {
+    const { app } = buildApp();
+    expect((await app.request("/api/v1/openapi.json")).status).toBe(404);
+    expect((await app.request("/api/v1/docs")).status).toBe(404);
+  });
+
   it("blocks openapi.json and docs when OPENAPI_ENABLED=false", async () => {
     const { app } = buildApp({ OPENAPI_ENABLED: "false" });
     expect((await app.request("/api/v1/openapi.json")).status).toBe(404);
@@ -50,7 +56,7 @@ describe("OpenAPI routes", () => {
   });
 
   it("documents mutation security as one ANDed requirement (session + csrf)", async () => {
-    const { app } = buildApp();
+    const { app } = buildApp({ OPENAPI_ENABLED: "true" });
     const doc = (await (
       await app.request("/api/v1/openapi.json")
     ).json()) as {
@@ -63,7 +69,7 @@ describe("OpenAPI routes", () => {
   });
 
   it("does not expose the environment name on the docs page", async () => {
-    const { app } = buildApp();
+    const { app } = buildApp({ OPENAPI_ENABLED: "true" });
     const html = await (await app.request("/api/v1/docs")).text();
     expect(html).not.toContain("Entorno:");
     expect(html).not.toContain("NODE_ENV");

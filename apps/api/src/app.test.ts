@@ -63,6 +63,7 @@ describe("createApp", () => {
       "default-src 'none'",
     );
     expect(response.headers.get("x-powered-by")).toBeNull();
+    expect(response.headers.get("cache-control")).toBe("no-store");
   });
 
   it("allows a CORS origin listed in the whitelist", async () => {

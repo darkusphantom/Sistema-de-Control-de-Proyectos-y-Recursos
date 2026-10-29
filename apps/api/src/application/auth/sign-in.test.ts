@@ -85,6 +85,10 @@ describe("createSignInUser", () => {
     );
     expect(logger.warn).toHaveBeenCalledTimes(1);
     const [payload] = logger.warn.mock.calls[0];
-    expect(payload).toMatchObject({ username: COMMAND.username });
+    expect(payload).toMatchObject({
+      event: "login_failed",
+      reason: "invalid_credentials",
+    });
+    expect(JSON.stringify(payload)).not.toContain(COMMAND.username);
   });
 });

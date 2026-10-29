@@ -1,6 +1,16 @@
 import { z } from "zod";
 
 /**
+ * Secreto de desarrollo documentado en `.env.example`.
+ *
+ * Se mantiene como default fuera de producción (ergonomía de `pnpm dev`) y
+ * `parseEnv` lo rechaza explícitamente cuando `NODE_ENV=production`, de modo
+ * que un despliegue con el valor de ejemplo no puede arrancar.
+ */
+export const DEV_AUTH_SECRET =
+  "dev-only-insecure-secret-do-not-use-0123456789abcdef0123456789abcdef";
+
+/**
  * Esquema zod del entorno de la API.
  *
  * Fail-fast: si una variable requerida falta o tiene un valor inválido,
@@ -32,19 +42,22 @@ export const envSchema = z.object({
   BETTER_AUTH_SECRET: z
     .string()
     .min(32)
-    .default(
-      "dev-only-insecure-secret-do-not-use-0123456789abcdef0123456789abcdef",
-    ),
+    .default(DEV_AUTH_SECRET),
   /** URL pública de la API para Better Auth. */
   BETTER_AUTH_URL: z.string().min(1).default("http://localhost:3001"),
   /** Máximo de peticiones por ventana de rate limit. */
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
   /** Duración de la ventana de rate limit en milisegundos. */
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(60_000),
-  /** Habilita el documento OpenAPI (`/openapi.json`, `/docs`). */
+  /**
+   * Habilita el documento OpenAPI (`/openapi.json`, `/docs`).
+   *
+   * Default `false`: la documentación se expone solo si se pide de forma
+   * explícita, nunca por olvido en un despliegue.
+   */
   OPENAPI_ENABLED: z
     .enum(["true", "false"])
-    .default("true")
+    .default("false")
     .transform((value) => value === "true"),
 });
 
@@ -80,6 +93,13 @@ export function parseEnv(source: NodeJS.ProcessEnv): Env {
           `Invalid environment: ${key} is required when NODE_ENV=production`,
         );
       }
+    }
+    // Definido pero inseguro es peor que ausente: el secreto de ejemplo es
+    // público (está en el repo) y permitiría firmar sesiones falsas.
+    if (source.BETTER_AUTH_SECRET === DEV_AUTH_SECRET) {
+      throw new Error(
+        "Invalid environment: BETTER_AUTH_SECRET must not be the documented development secret in production",
+      );
     }
   }
   const result = envSchema.safeParse(source);

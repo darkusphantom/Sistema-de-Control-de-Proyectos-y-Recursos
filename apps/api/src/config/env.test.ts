@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseEnv } from "./env";
+import { DEV_AUTH_SECRET, parseEnv } from "./env";
 
 describe("parseEnv", () => {
   it("applies the documented defaults when nothing is provided", () => {
@@ -14,7 +14,7 @@ describe("parseEnv", () => {
     expect(env.BETTER_AUTH_URL).toBe("http://localhost:3001");
     expect(env.RATE_LIMIT_MAX).toBe(100);
     expect(env.RATE_LIMIT_WINDOW_MS).toBe(60_000);
-    expect(env.OPENAPI_ENABLED).toBe(true);
+    expect(env.OPENAPI_ENABLED).toBe(false);
   });
 
   it("parses a fully provided source into a typed environment", () => {
@@ -78,6 +78,23 @@ describe("parseEnv", () => {
         BETTER_AUTH_URL: "https://api.example.com",
       }),
     ).toThrow(/RATE_LIMIT_MAX/);
+  });
+
+  it("rejects the documented development secret in production", () => {
+    expect(() =>
+      parseEnv({
+        NODE_ENV: "production",
+        CORS_ORIGINS: "https://red.facyt.edu.ve",
+        BETTER_AUTH_SECRET: DEV_AUTH_SECRET,
+        BETTER_AUTH_URL: "https://api.red.facyt.edu.ve",
+        RATE_LIMIT_MAX: "100",
+        RATE_LIMIT_WINDOW_MS: "60000",
+      }),
+    ).toThrow(/BETTER_AUTH_SECRET must not be the documented development secret/);
+  });
+
+  it("keeps OpenAPI disabled unless explicitly enabled", () => {
+    expect(parseEnv({ OPENAPI_ENABLED: "true" }).OPENAPI_ENABLED).toBe(true);
   });
 
   it("rejects a BETTER_AUTH_SECRET shorter than 32 bytes", () => {

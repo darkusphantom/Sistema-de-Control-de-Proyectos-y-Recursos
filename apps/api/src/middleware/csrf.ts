@@ -1,4 +1,4 @@
-import { randomBytes } from "node:crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Env } from "../config/env";
 import type { MiddlewareHandler } from "hono";
 import { getCookie, setCookie } from "hono/cookie";
@@ -13,15 +13,20 @@ export const CSRF_HEADER_NAME = "x-csrf-token";
 /**
  * Comparación en tiempo constante de dos cadenas (anti timing attack).
  *
+ * Los tokens son hex ASCII, así que comparar buffers equivale a comparar los
+ * textos. `timingSafeEqual` exige longitudes iguales: la comprobación previa
+ * evita su excepción y no filtra el contenido, solo la longitud.
+ *
  * @param a - Primer valor.
  * @param b - Segundo valor.
  * @returns `true` si son idénticas.
+ * @complexity O(n) con n = longitud del token (32 bytes fijos).
  */
 function safeEqual(a: string, b: string): boolean {
   const bufferA = Buffer.from(a);
   const bufferB = Buffer.from(b);
   if (bufferA.length !== bufferB.length) return false;
-  return bufferA.equals(bufferB);
+  return timingSafeEqual(bufferA, bufferB);
 }
 
 /**

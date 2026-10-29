@@ -67,8 +67,10 @@ export function createSignInUser(deps: {
         error instanceof Error
           ? { name: error.name, message: error.message }
           : { message: String(error) };
+      // Sin username ni email: los logs no son un almacén de datos personales
+      // ni deben permitir inyección de contenido en el recolector.
       deps.logger?.warn(
-        { username: command.username, err: detail },
+        { event: "login_failed", reason: "invalid_credentials", err: detail },
         "Login failed",
       );
       throw new InvalidCredentialsError();
