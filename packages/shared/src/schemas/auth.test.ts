@@ -201,10 +201,10 @@ describe("userSchema", () => {
 });
 
 describe("SetUserRoleSchema", () => {
-  it("accepts the three roles and rejects others", () => {
+  it("accepts the assignable roles and rejects admin_sistema and others", () => {
     expect(SetUserRoleSchema.safeParse({ role: "coordinador" }).success).toBe(true);
     expect(SetUserRoleSchema.safeParse({ role: "aprobador" }).success).toBe(true);
-    expect(SetUserRoleSchema.safeParse({ role: "admin_sistema" }).success).toBe(true);
+    expect(SetUserRoleSchema.safeParse({ role: "admin_sistema" }).success).toBe(false);
     expect(SetUserRoleSchema.safeParse({ role: "superuser" }).success).toBe(false);
   });
 });

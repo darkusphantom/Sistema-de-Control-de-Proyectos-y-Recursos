@@ -80,7 +80,14 @@ export const userSchema = z
   })
   .strict();
 
-/** Cuerpo de asignación de rol por admin del sistema. */
+/**
+ * Cuerpo de asignación de rol por admin del sistema.
+ *
+ * `admin_sistema` queda fuera del enum de destino: el alta y la baja de
+ * administradores es **operativa** (seed del ambiente), no una transición de
+ * esta API (decisiones D5/D6 de `wireframes_admin.md`). Con ello el endpoint
+ * no puede crear administradores.
+ */
 export const SetUserRoleSchema = z.object({
-  role: z.enum(["coordinador", "aprobador", "admin_sistema"] as const),
+  role: z.enum(["coordinador", "aprobador"] as const),
 });

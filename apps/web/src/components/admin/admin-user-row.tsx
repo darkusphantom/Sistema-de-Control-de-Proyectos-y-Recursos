@@ -60,7 +60,6 @@ export function AdminUserRow({ user, onChangeRole }: AdminUserRowProps) {
           >
             <option value="coordinador">coordinador</option>
             <option value="aprobador">aprobador</option>
-            <option value="admin_sistema">admin_sistema</option>
           </SelectField>
           {!isRoleChangeAllowed && (
             <span className="text-[10px] text-danger mt-1">

@@ -71,12 +71,12 @@ describe("AdminView", () => {
     const select = screen.getByRole("combobox", {
       name: "Cambiar rol de @j.perez",
     });
-    await userEventSetup.selectOptions(select, "admin_sistema");
+    await userEventSetup.selectOptions(select, "coordinador");
     await userEventSetup.click(screen.getByRole("button", { name: "Confirmar" }));
 
     await waitFor(() => {
       expect(screen.getByRole("status")).toHaveTextContent(
-        'Rol de @j.perez actualizado a "admin_sistema".',
+        'Rol de @j.perez actualizado a "coordinador".',
       );
     });
   });

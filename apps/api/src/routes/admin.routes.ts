@@ -19,9 +19,9 @@ import { parseJsonBody, validationError } from "./helpers";
  * @param deps - Dependencias inyectadas.
  */
 export function registerAdminRoutes(app: Hono, deps: RouteDeps): void {
-  const { auth, users, trustedOrigins } = deps;
+  const { auth, users, trustedOrigins, logger } = deps;
   const csrfMiddleware = csrf(trustedOrigins);
-  const setUserRoleUseCase = setUserRole({ users });
+  const setUserRoleUseCase = setUserRole({ users, logger });
 
   app.patch(
     "/api/v1/admin/users/:id/role",
@@ -34,7 +34,13 @@ export function registerAdminRoutes(app: Hono, deps: RouteDeps): void {
       const body = await parseJsonBody(c);
       const parsed = SetUserRoleSchema.safeParse(body);
       if (!parsed.success) return validationError(c, parsed.error);
-      await setUserRoleUseCase(idParsed.data, parsed.data.role);
+      const session = c.get("session");
+      await setUserRoleUseCase({
+        targetId: idParsed.data,
+        role: parsed.data.role,
+        actorId: session.user.id,
+        requestId: c.get("requestId"),
+      });
       return c.body(null, 204);
     },
   );
